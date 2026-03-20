@@ -145,27 +145,31 @@ At minimum, update these values for your real deployment:
 
 Typical production values look like this:
 
+```yaml
 services:
   minio:
     ports:
-      - "127.0.0.1:9000:9000"
-      - "127.0.0.1:9001:9001"
+      - '127.0.0.1:9000:9000'
+      - '127.0.0.1:9001:9001'
 
   xdrop:
     ports:
-      - "127.0.0.1:8080:80"
+      - '127.0.0.1:8080:80'
     environment:
       S3_PUBLIC_ENDPOINT: https://xdrop.example.com
       ALLOWED_ORIGINS: https://xdrop.example.com
+```
 
-Treat .env.example as the reference list of supported settings. The provided Compose file uses
+Treat `.env.example` as the reference list of supported settings. The provided Compose file uses
 inline environment values, so editing .env.example alone does not change the running stack.
 
 ### 3. Use the published image
 
+```bash
 docker compose up -d
+```
 
-This uses ghcr.io/xixu-me/xdrop:latest (https://ghcr.io/xixu-me/xdrop).
+This uses `ghcr.io/xixu-me/xdrop:latest` (<https://ghcr.io/xixu-me/xdrop>).
 
 This is enough for a working deployment when the published image already matches the frontend
 build-time settings you want.
@@ -178,29 +182,35 @@ Important caveat:
 
 ### 4. Optional: use your own prebuilt image
 
-Set XDROP_IMAGE if you want the server to run a different prebuilt image:
+Set `XDROP_IMAGE` if you want the server to run a different prebuilt image:
 
+```bash
 XDROP_IMAGE=ghcr.io/your-org/xdrop:your-tag docker compose up -d
+```
 
 ### 5. Optional: build your own image
 
-Build your own image when you need custom frontend build-time settings such as VITE_SITE_URL or
-VITE_API_BASE_URL:
+Build your own image when you need custom frontend build-time settings such as `VITE_SITE_URL` or
+`VITE_API_BASE_URL`:
 
+```bash
 git clone https://github.com/xixu-me/xdrop.git
 cd xdrop
 docker compose -f docker-compose.yml -f docker-compose.build.yml up -d --build
+```
 
-Edit the build args in docker-compose.build.yml before you run that command.
+Edit the build args in `docker-compose.build.yml` before you run that command.
 
 Example:
 
+```yaml
 services:
   xdrop:
     build:
       args:
         VITE_SITE_URL: https://xdrop.example.com
         VITE_API_BASE_URL: /api/v1
+```
 
 On low-memory servers, building the image directly on the host may be slow or fail due to memory
 pressure. In that case, build elsewhere, push the image to a registry, and deploy it with
@@ -210,14 +220,18 @@ XDROP_IMAGE.
 
 Example Caddyfile:
 
+```caddyfile
 xdrop.example.com {
   encode gzip zstd
   reverse_proxy 127.0.0.1:8080
 }
+```
 
 Then reload Caddy:
 
+```bash
 systemctl reload caddy
+```
 
 After the stack starts, open https://xdrop.example.com.
 
