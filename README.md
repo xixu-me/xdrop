@@ -127,6 +127,7 @@ curl -fsSL -o docker-compose.yml https://github.com/xixu-me/xdrop/raw/refs/heads
 curl -fsSL -o .env.example https://github.com/xixu-me/xdrop/raw/refs/heads/main/.env.example
 curl -fsSL -o infra/minio/init.sh https://github.com/xixu-me/xdrop/raw/refs/heads/main/infra/minio/init.sh
 chmod +x infra/minio/init.sh
+```
 
 If you want to build your own image, clone the repository instead so Docker has the full build
 context (Dockerfile, app sources, packages, and infra files). In most cases, it is better to
