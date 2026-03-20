@@ -104,6 +104,17 @@ same.
 
 This section is for deploying Xdrop to a cloud server.
 
+### Recommended production topology
+
+For a public deployment, run Xdrop behind a reverse proxy such as Caddy or nginx:
+
+- The reverse proxy terminates HTTPS for your public domain.
+- The `xdrop` container listens on a loopback-only host port such as `127.0.0.1:8080`.
+- MinIO should not be exposed publicly. Bind MinIO ports to `127.0.0.1` only unless you have a
+  specific reason to expose them.
+- Set `S3_PUBLIC_ENDPOINT` and `ALLOWED_ORIGINS` to your public site URL, for example
+  `https://xdrop.example.com`.
+
 ### 1. Get the files
 
 If you only want to run the published image, you do not need to clone the whole repository on the
@@ -116,64 +127,106 @@ curl -fsSL -o docker-compose.yml https://github.com/xixu-me/xdrop/raw/refs/heads
 curl -fsSL -o .env.example https://github.com/xixu-me/xdrop/raw/refs/heads/main/.env.example
 curl -fsSL -o infra/minio/init.sh https://github.com/xixu-me/xdrop/raw/refs/heads/main/infra/minio/init.sh
 chmod +x infra/minio/init.sh
-```
 
-If you want to build your own image on the server, clone the repository instead so Docker has the
-full build context (`Dockerfile`, app sources, packages, and infra files). In that case you can use
-the checked-out `docker-compose.build.yml` directly.
+If you want to build your own image, clone the repository instead so Docker has the full build
+context (Dockerfile, app sources, packages, and infra files). In most cases, it is better to
+build the image in CI or on a separate machine and only pull the final image on the server.
 
 ### 2. Review configuration
 
-- Install Docker and Docker Compose on the server.
-- Update the `xdrop` service environment values in `docker-compose.yml` for your real domain,
-  database, Redis, and S3-compatible storage.
-- Pay particular attention to `S3_PUBLIC_ENDPOINT` and `ALLOWED_ORIGINS`, which should point to
-  your public server URL instead of `localhost`.
-- Treat `.env.example` as the reference list of supported settings. The provided Compose file uses
-  inline environment values, so editing `.env.example` alone does not change the running stack.
+Install Docker and Docker Compose on the server, then review the xdrop service environment in
+docker-compose.yml.
+
+At minimum, update these values for your real deployment:
+
+- S3_PUBLIC_ENDPOINT
+- ALLOWED_ORIGINS
+
+Typical production values look like this:
+
+services:
+  minio:
+    ports:
+      - "127.0.0.1:9000:9000"
+      - "127.0.0.1:9001:9001"
+
+  xdrop:
+    ports:
+      - "127.0.0.1:8080:80"
+    environment:
+      S3_PUBLIC_ENDPOINT: https://xdrop.example.com
+      ALLOWED_ORIGINS: https://xdrop.example.com
+
+Treat .env.example as the reference list of supported settings. The provided Compose file uses
+inline environment values, so editing .env.example alone does not change the running stack.
 
 ### 3. Use the published image
 
-```bash
 docker compose up -d
-```
 
-This uses [`ghcr.io/xixu-me/xdrop:latest`](https://ghcr.io/xixu-me/xdrop). It is enough for a
-working deployment when the published image already matches the frontend build settings you want.
+This uses ghcr.io/xixu-me/xdrop:latest (https://ghcr.io/xixu-me/xdrop).
 
-### 4. Optional: use your own image
+This is enough for a working deployment when the published image already matches the frontend
+build-time settings you want.
 
-Set `XDROP_IMAGE` if you want the server to run a different prebuilt image:
+Important caveat:
 
-```bash
+- Frontend build-time values such as VITE_SITE_URL are baked into the image.
+- If your deployment uses a different public domain and you care about canonical URLs, Open Graph
+  metadata, JSON-LD, or sitemap generation, use your own rebuilt image instead of the published one.
+
+### 4. Optional: use your own prebuilt image
+
+Set XDROP_IMAGE if you want the server to run a different prebuilt image:
+
 XDROP_IMAGE=ghcr.io/your-org/xdrop:your-tag docker compose up -d
-```
 
 ### 5. Optional: build your own image
 
-Build your own image when you need custom frontend build-time settings such as `VITE_SITE_URL` or
-`VITE_API_BASE_URL`:
+Build your own image when you need custom frontend build-time settings such as VITE_SITE_URL or
+VITE_API_BASE_URL:
 
-```bash
 git clone https://github.com/xixu-me/xdrop.git
 cd xdrop
 docker compose -f docker-compose.yml -f docker-compose.build.yml up -d --build
-```
 
-Edit the build args in `docker-compose.build.yml` before you run that command.
+Edit the build args in docker-compose.build.yml before you run that command.
 
-After the stack starts, open your server domain or server IP and port. With the default Compose
-mapping, that is `http://<server-ip>:8080` unless you place it behind a reverse proxy.
+Example:
+
+services:
+  xdrop:
+    build:
+      args:
+        VITE_SITE_URL: https://xdrop.example.com
+        VITE_API_BASE_URL: /api/v1
+
+On low-memory servers, building the image directly on the host may be slow or fail due to memory
+pressure. In that case, build elsewhere, push the image to a registry, and deploy it with
+XDROP_IMAGE.
+
+### 6. Put Xdrop behind a reverse proxy
+
+Example Caddyfile:
+
+xdrop.example.com {
+  encode gzip zstd
+  reverse_proxy 127.0.0.1:8080
+}
+
+Then reload Caddy:
+
+systemctl reload caddy
+
+After the stack starts, open https://xdrop.example.com.
 
 ### Production notes
 
-- The example variables in `.env.example` document the API and web build settings supported by
-  the project.
 - The final container serves the built frontend with nginx and runs the Go API in the same
   container.
-- The stack includes `xdrop`, `postgres`, `redis`, `minio`, and the bucket bootstrap container.
-- Frontend build-time values such as `VITE_SITE_URL` are baked into the image. Changing them
-  requires rebuilding the image.
+- The stack includes xdrop, postgres, redis, minio, and the bucket bootstrap container.
+- MinIO is intended to be private in the default single-host deployment.
+- Public traffic should normally hit only the reverse proxy on ports 80 and 443.
 
 ## Development
 
