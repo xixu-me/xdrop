@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Support guide
+    url: https://github.com/xixu-me/xdrop/blob/main/SUPPORT.md
+    about: Use the public support process for setup help, troubleshooting, and questions.
+  - name: Security policy
+    url: https://github.com/xixu-me/xdrop/blob/main/SECURITY.md
+    about: Report vulnerabilities privately. Do not open public security issues.

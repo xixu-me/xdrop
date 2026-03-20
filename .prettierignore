@@ -1,0 +1,12 @@
+.codex
+.git
+coverage
+dist
+node_modules
+output
+playwright-report
+test-results
+tmp
+apps/api/bin
+apps/web/dist
+apps/web/node_modules

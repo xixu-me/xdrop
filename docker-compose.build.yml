@@ -1,0 +1,9 @@
+services:
+  xdrop:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VITE_SITE_URL: http://localhost:8080
+        VITE_API_BASE_URL: /api/v1
+    image: xdrop:local

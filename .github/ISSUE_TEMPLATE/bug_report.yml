@@ -1,0 +1,80 @@
+name: Bug report
+description: Report a reproducible problem in Xdrop
+title: 'bug: '
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve Xdrop.
+
+        Please use this form for reproducible defects only. If you are unsure whether this is a
+        bug or you need help with setup, use the question form instead.
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: Preflight
+      options:
+        - label: I searched existing issues and pull requests.
+          required: true
+        - label: This is not a sensitive security report.
+          required: true
+        - label: I removed secrets, tokens, and real share links from the report.
+          required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Web app
+        - API
+        - Encryption or share-link flow
+        - Docker or local environment
+        - CI or automation
+        - Documentation
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: summary
+    attributes:
+      label: What happened?
+      description: Describe the bug and the user-visible impact.
+      placeholder: Uploads resume incorrectly after refresh and the share page never reaches Ready.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect to happen?
+      placeholder: After refresh, the upload should reconnect and eventually reach Ready.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction steps
+      description: Be as specific as possible.
+      placeholder: |
+        1. Start the local Docker stack
+        2. Open http://localhost:8080
+        3. Upload a large file
+        4. Refresh during chunk upload
+        5. Observe...
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Browser, OS, commit/tag, and anything relevant about your setup.
+      placeholder: Windows 11, Chrome 134, local main branch, Docker Desktop 4.x
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs, screenshots, or extra context
+      description: Paste sanitized logs or add screenshots if they help.
+      render: shell

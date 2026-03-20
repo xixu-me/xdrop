@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600" fill="none">
+  <defs>
+    <linearGradient id="brand-lockup-horizontal-shell" x1="118" y1="34" x2="1048" y2="626" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#171C17" />
+      <stop offset="0.58" stop-color="#101410" />
+      <stop offset="1" stop-color="#0A0D0A" />
+    </linearGradient>
+    <radialGradient id="brand-lockup-horizontal-glow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(278 156) rotate(28) scale(392 286)">
+      <stop stop-color="#F7F2E8" stop-opacity="0.08" />
+      <stop offset="0.34" stop-color="#8CB5FF" stop-opacity="0.08" />
+      <stop offset="1" stop-color="#8CB5FF" stop-opacity="0" />
+    </radialGradient>
+    <linearGradient id="brand-lockup-horizontal-cream" x1="112" y1="92" x2="204" y2="184" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFF9EE" />
+      <stop offset="0.72" stop-color="#F7F2E8" />
+      <stop offset="1" stop-color="#E8DDCB" />
+    </linearGradient>
+    <linearGradient id="brand-lockup-horizontal-blue" x1="102" y1="84" x2="200" y2="192" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2D66DE" />
+      <stop offset="0.7" stop-color="#0D4FCF" />
+      <stop offset="1" stop-color="#083B9F" />
+    </linearGradient>
+    <linearGradient id="brand-lockup-horizontal-text" x1="412" y1="150" x2="884" y2="382" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFF9EE" />
+      <stop offset="0.82" stop-color="#F1E8DB" />
+      <stop offset="1" stop-color="#D9CCBB" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="600" rx="108" fill="url(#brand-lockup-horizontal-shell)" />
+  <rect width="1200" height="600" rx="108" fill="url(#brand-lockup-horizontal-glow)" />
+  <g transform="translate(122 92)">
+    <g transform="translate(188 208) scale(2.67) translate(-128 -128)">
+      <g transform="rotate(-45 128 128)">
+        <rect x="70" y="108" width="116" height="40" rx="18" fill="url(#brand-lockup-horizontal-cream)" />
+      </g>
+      <g transform="rotate(45 128 128)">
+        <rect x="70" y="108" width="116" height="40" rx="18" fill="url(#brand-lockup-horizontal-blue)" />
+      </g>
+      <path d="M128 98L158 128L128 158L98 128L128 98Z" fill="#0E120E" />
+    </g>
+    <rect x="410" y="76" width="1" height="216" fill="#F7F2E812" />
+    <text
+      x="480"
+      y="248"
+      fill="url(#brand-lockup-horizontal-text)"
+      font-family="Fraunces, Georgia, serif"
+      font-size="156"
+      font-weight="700"
+      letter-spacing="0.01em"
+    >
+      Xdrop
+    </text>
+  </g>
+</svg>

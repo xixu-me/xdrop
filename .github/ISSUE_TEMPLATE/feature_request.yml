@@ -1,0 +1,62 @@
+name: Feature request
+description: Suggest an improvement that fits Xdrop's scope
+title: 'feat: '
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to propose an improvement.
+
+        Xdrop is intentionally focused on privacy-preserving file transfer. Requests that start from
+        the problem they solve are much easier to evaluate than implementation-first ideas.
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: Preflight
+      options:
+        - label: I searched existing issues and pull requests.
+          required: true
+        - label: This request is not a security report.
+          required: true
+        - label: I understand large scope changes may need discussion before implementation.
+          required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem are you trying to solve?
+      placeholder: It is hard to tell which transfers are safe to delete after privacy mode clears local controls.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      placeholder: Add a sender-side status hint explaining what metadata remains locally after privacy mode runs.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      placeholder: Documentation update, status copy tweak, or no change.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Upload flow
+        - Receive flow
+        - Transfer management
+        - API or storage
+        - Local development or tooling
+        - Documentation
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional context
+      description: Mockups, related issues, constraints, or rollout concerns.

@@ -1,0 +1,83 @@
+server {
+  listen 80;
+  server_name _;
+  client_max_body_size 0;
+
+  root /usr/share/nginx/html;
+  index index.html;
+
+  add_header Content-Security-Policy "default-src 'self'; connect-src 'self' data: blob:; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; font-src 'self' data:; script-src 'self'; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'" always;
+  add_header X-Content-Type-Options "nosniff" always;
+  add_header X-Frame-Options "DENY" always;
+  add_header Referrer-Policy "same-origin" always;
+  add_header Cross-Origin-Opener-Policy "same-origin" always;
+  add_header Cross-Origin-Resource-Policy "same-site" always;
+  add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
+
+  location = /healthz {
+    proxy_pass ${API_UPSTREAM};
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+  }
+
+  location /api/ {
+    proxy_pass ${API_UPSTREAM};
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+  }
+
+  location /xdrop/ {
+    proxy_pass ${S3_PROXY_TARGET};
+    proxy_http_version 1.1;
+    proxy_buffering off;
+    proxy_request_buffering off;
+    proxy_set_header Host $http_host;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+  }
+
+  location = / {
+    try_files /index.html =404;
+  }
+
+  location = /transfers {
+    add_header X-Robots-Tag "noindex, nofollow, noarchive, nosnippet" always;
+    add_header Cache-Control "no-store, max-age=0" always;
+    add_header Pragma "no-cache" always;
+    try_files /transfers/index.html =404;
+  }
+
+  location = /transfers/ {
+    add_header X-Robots-Tag "noindex, nofollow, noarchive, nosnippet" always;
+    add_header Cache-Control "no-store, max-age=0" always;
+    add_header Pragma "no-cache" always;
+    try_files /transfers/index.html =404;
+  }
+
+  location ^~ /share/ {
+    add_header X-Robots-Tag "noindex, nofollow, noarchive, nosnippet" always;
+    add_header Cache-Control "no-store, max-age=0" always;
+    add_header Pragma "no-cache" always;
+    try_files /share/index.html =404;
+  }
+
+  location ^~ /t/ {
+    add_header X-Robots-Tag "noindex, nofollow, noarchive, nosnippet" always;
+    add_header Cache-Control "no-store, max-age=0" always;
+    add_header Pragma "no-cache" always;
+    try_files /t/index.html =404;
+  }
+
+  location ^~ /assets/ {
+    try_files $uri =404;
+  }
+
+  location / {
+    add_header X-Robots-Tag "noindex, nofollow, noarchive, nosnippet" always;
+    try_files $uri /not-found/index.html;
+  }
+}
