@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/alicebob/miniredis/v2"
 	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/require"
 )
@@ -83,4 +84,31 @@ func TestRedisLimiterReturnsPipelineErrors(t *testing.T) {
 	allowed, err := NewRedisLimiter(client).Allow(context.Background(), "client-a", 1, time.Minute)
 	require.False(t, allowed)
 	require.ErrorContains(t, err, "exec rate limit pipeline")
+}
+
+func TestRedisLimiterAllowsUpToLimitThenBlocks(t *testing.T) {
+	t.Parallel()
+
+	server, err := miniredis.Run()
+	require.NoError(t, err)
+	t.Cleanup(server.Close)
+
+	client := redis.NewClient(&redis.Options{Addr: server.Addr()})
+	t.Cleanup(func() {
+		_ = client.Close()
+	})
+
+	limiter := NewRedisLimiter(client)
+
+	allowed, err := limiter.Allow(context.Background(), "client-a", 2, time.Minute)
+	require.NoError(t, err)
+	require.True(t, allowed)
+
+	allowed, err = limiter.Allow(context.Background(), "client-a", 2, time.Minute)
+	require.NoError(t, err)
+	require.True(t, allowed)
+
+	allowed, err = limiter.Allow(context.Background(), "client-a", 2, time.Minute)
+	require.NoError(t, err)
+	require.False(t, allowed)
 }

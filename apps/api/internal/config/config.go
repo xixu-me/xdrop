@@ -78,12 +78,6 @@ func Load() (Config, error) {
 	presignSeconds := getenvInt("PRESIGN_TTL_SECONDS", 300)
 	cfg.PresignTTL = time.Duration(presignSeconds) * time.Second
 
-	if cfg.DatabaseURL == "" {
-		return Config{}, fmt.Errorf("DATABASE_URL is required")
-	}
-	if cfg.S3Bucket == "" {
-		return Config{}, fmt.Errorf("S3_BUCKET is required")
-	}
 	if !IsAllowedExpiry(cfg.DefaultExpiry) {
 		return Config{}, fmt.Errorf("DEFAULT_EXPIRY_SECONDS must be one of the supported expiry options")
 	}

@@ -17,7 +17,7 @@ var migrationFS embed.FS
 var (
 	embeddedMigrationFiles migrationFiles = migrationFS
 	newMigrationDBFromPool                = func(db *pgxpool.Pool) postgresDB {
-		return pgxPoolDB{pool: db}
+		return pgxPoolDB{pool: livePGXPool{pool: db}}
 	}
 )
 

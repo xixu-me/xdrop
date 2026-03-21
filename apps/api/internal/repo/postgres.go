@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/xdrop/monorepo/internal/models"
 )
@@ -40,8 +41,67 @@ type postgresDB interface {
 	QueryRow(ctx context.Context, sql string, args ...any) postgresRow
 }
 
+type pgxPoolAdapter interface {
+	Begin(ctx context.Context) (pgxTxAdapter, error)
+	Exec(ctx context.Context, sql string, args ...any) (pgconn.CommandTag, error)
+	Query(ctx context.Context, sql string, args ...any) (postgresRows, error)
+	QueryRow(ctx context.Context, sql string, args ...any) postgresRow
+}
+
+type pgxTxAdapter interface {
+	Commit(ctx context.Context) error
+	Exec(ctx context.Context, sql string, args ...any) (pgconn.CommandTag, error)
+	QueryRow(ctx context.Context, sql string, args ...any) postgresRow
+	Rollback(ctx context.Context) error
+}
+
 type pgxPoolDB struct {
+	pool pgxPoolAdapter
+}
+
+type livePGXPool struct {
 	pool *pgxpool.Pool
+}
+
+func (p livePGXPool) Begin(ctx context.Context) (pgxTxAdapter, error) {
+	tx, err := p.pool.Begin(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return livePGXTx{tx: tx}, nil
+}
+
+func (p livePGXPool) Exec(ctx context.Context, sql string, args ...any) (pgconn.CommandTag, error) {
+	return p.pool.Exec(ctx, sql, args...)
+}
+
+func (p livePGXPool) Query(ctx context.Context, sql string, args ...any) (postgresRows, error) {
+	return p.pool.Query(ctx, sql, args...)
+}
+
+func (p livePGXPool) QueryRow(ctx context.Context, sql string, args ...any) postgresRow {
+	return p.pool.QueryRow(ctx, sql, args...)
+}
+
+type livePGXTx struct {
+	tx pgx.Tx
+}
+
+func (t livePGXTx) Commit(ctx context.Context) error {
+	return t.tx.Commit(ctx)
+}
+
+func (t livePGXTx) Exec(ctx context.Context, sql string, args ...any) (pgconn.CommandTag, error) {
+	return t.tx.Exec(ctx, sql, args...)
+}
+
+func (t livePGXTx) QueryRow(ctx context.Context, sql string, args ...any) postgresRow {
+	return t.tx.QueryRow(ctx, sql, args...)
+}
+
+func (t livePGXTx) Rollback(ctx context.Context) error {
+	return t.tx.Rollback(ctx)
 }
 
 func (d pgxPoolDB) Begin(ctx context.Context) (postgresTx, error) {
@@ -67,7 +127,7 @@ func (d pgxPoolDB) QueryRow(ctx context.Context, sql string, args ...any) postgr
 }
 
 type pgxTx struct {
-	tx pgx.Tx
+	tx pgxTxAdapter
 }
 
 func (t pgxTx) Commit(ctx context.Context) error {
@@ -94,7 +154,7 @@ type PostgresRepository struct {
 
 // NewPostgresRepository wraps a pgx pool with the repository implementation.
 func NewPostgresRepository(db *pgxpool.Pool) *PostgresRepository {
-	return &PostgresRepository{db: pgxPoolDB{pool: db}}
+	return &PostgresRepository{db: pgxPoolDB{pool: livePGXPool{pool: db}}}
 }
 
 // CreateTransfer inserts a new transfer in draft state.

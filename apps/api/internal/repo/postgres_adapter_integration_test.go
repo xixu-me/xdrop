@@ -12,7 +12,7 @@ func TestPGXPoolDBAndPGXTxAdapters(t *testing.T) {
 
 	ctx := context.Background()
 	pool := startPostgresTestDB(t, ctx)
-	database := pgxPoolDB{pool: pool}
+	database := pgxPoolDB{pool: livePGXPool{pool: pool}}
 
 	require.NoError(t, database.Exec(ctx, `CREATE TEMP TABLE adapter_test (id text PRIMARY KEY)`))
 
