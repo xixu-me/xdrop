@@ -53,7 +53,7 @@ workflows, keeping plaintext file names, contents, and keys off the server.
 You can also use Xdrop through an agent by installing the bundled skill:
 
 ```bash
-npx skills add https://github.com/xixu-me/xdrop/tree/main/skills/xdrop
+bunx skills add https://github.com/xixu-me/xdrop/tree/main/skills/xdrop
 ```
 
 After that, the agent can use Xdrop from the terminal to:
