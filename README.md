@@ -50,7 +50,7 @@ workflows, keeping plaintext file names, contents, and keys off the server.
 
 ## Use Via Agents
 
-You can also use Xdrop through an agent by installing the bundled skill:
+You can use Xdrop through an agent by installing the bundled skill:
 
 ```bash
 bunx skills add https://github.com/xixu-me/xdrop/tree/main/skills/xdrop

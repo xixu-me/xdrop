@@ -78,7 +78,7 @@ Chinese reference copy:
 - Short positioning summary:
   `以浏览器为主体验的加密文件传输，也支持智能体终端工作流。`
 - Agent support blurb:
-  `日常分享可直接使用浏览器；如果你需要把文件从云服务器、远程容器或自动化终端流程中传出来，也可以通过智能体使用 Xdrop。`
+  `日常分享可直接使用浏览器；如果你需要将文件从云服务器、远程容器或自动化终端流程中传出来，也可以通过智能体使用 Xdrop。`
 
 ## Messaging Priorities
 
