@@ -76,11 +76,9 @@ By default the downloader writes to `./xdrop-<transferId>` and preserves the man
 
 - A download link without the `#k=...` fragment is not decryptable. Ask for the full original share URL.
 - Use `--quiet` whenever another command or caller needs to capture stdout. Progress logs otherwise go to stderr, but the final result still matters.
-- The bundled scripts are self-contained. Prefer them over repository-level wrappers so the skill still works when used outside this repository.
 
 ## Guardrails
 
-- Run the bundled scripts by relative path from the skill root. Do not rely on repository-level wrappers such as `bun run upload:cli` or `bun run download:cli`.
 - Prefer `--quiet` when another command or script needs to capture stdout.
 - Keep the full share link fragment intact for downloads.
 - Do not bypass the scripts' built-in path sanitization or transfer cleanup behavior with manual ad hoc commands unless the user explicitly asks.
