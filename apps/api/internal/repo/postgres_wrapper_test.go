@@ -5,7 +5,9 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/stretchr/testify/require"
 )
 
@@ -18,7 +20,18 @@ func TestNewPostgresRepositoryWrapsPoolBackedDB(t *testing.T) {
 	require.True(t, ok)
 	livePool, ok := wrapped.pool.(livePGXPool)
 	require.True(t, ok)
-	require.Nil(t, livePool.pool)
+	pool, ok := livePool.pool.(*pgxpool.Pool)
+	require.True(t, ok)
+	require.Nil(t, pool)
+}
+
+func TestLivePGXPoolBeginReturnsErrors(t *testing.T) {
+	t.Parallel()
+
+	pool := livePGXPool{pool: stubLivePGXPool{beginErr: errors.New("boom")}}
+
+	_, err := pool.Begin(context.Background())
+	require.ErrorContains(t, err, "boom")
 }
 
 func TestPGXPoolDBDelegatesToPool(t *testing.T) {
@@ -136,4 +149,24 @@ func (tx *stubPGXTx) QueryRow(context.Context, string, ...any) postgresRow {
 func (tx *stubPGXTx) Rollback(context.Context) error {
 	tx.rollbackCalled = true
 	return nil
+}
+
+type stubLivePGXPool struct {
+	beginErr error
+}
+
+func (p stubLivePGXPool) Begin(context.Context) (pgx.Tx, error) {
+	return nil, p.beginErr
+}
+
+func (stubLivePGXPool) Exec(context.Context, string, ...any) (pgconn.CommandTag, error) {
+	return pgconn.CommandTag{}, nil
+}
+
+func (stubLivePGXPool) Query(context.Context, string, ...any) (pgx.Rows, error) {
+	return nil, nil
+}
+
+func (stubLivePGXPool) QueryRow(context.Context, string, ...any) pgx.Row {
+	return stubRow{}
 }
