@@ -1,0 +1,49 @@
+name: Question or support request
+description: Ask for help with setup, usage, or expected behavior
+title: 'question: '
+labels:
+  - question
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please keep support questions public unless the topic is security-sensitive.
+
+        If this turns out to be a bug, a maintainer can help convert it into a bug report.
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: Preflight
+      options:
+        - label: I searched existing issues and pull requests.
+          required: true
+        - label: This is not a sensitive security report.
+          required: true
+  - type: textarea
+    id: goal
+    attributes:
+      label: What are you trying to do?
+      placeholder: I want to run the full stack locally and verify the Playwright flow.
+    validations:
+      required: true
+  - type: textarea
+    id: tried
+    attributes:
+      label: What have you tried so far?
+      placeholder: I ran docker compose up, then bun run test:e2e, but the app never became healthy.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, browser, Docker version, Bun version, Go version, and branch if relevant.
+      placeholder: macOS 15, Docker 28.x, Bun 1.3.x, Go 1.26.x, branch main
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: Error output or additional context
+      description: Paste sanitized logs, screenshots, or command output that would help someone assist.
+      render: shell

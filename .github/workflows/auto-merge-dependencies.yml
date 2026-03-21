@@ -1,0 +1,314 @@
+name: Auto-merge Dependencies
+
+on:
+  pull_request_target:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+  workflow_run:
+    workflows:
+      - CI
+    types:
+      - completed
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  checks: read
+
+jobs:
+  mark-safe-updates:
+    name: Mark safe Dependabot PRs
+    if: ${{ github.event_name == 'pull_request_target' && github.actor == 'dependabot[bot]' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Label updates that can auto-merge
+        uses: actions/github-script@v8
+        env:
+          AUTO_MERGE_LABEL: dependencies:auto-merge
+        with:
+          script: |
+            const owner = context.repo.owner
+            const repo = context.repo.repo
+            const issue_number = context.issue.number
+            const label = process.env.AUTO_MERGE_LABEL
+            const pr = context.payload.pull_request
+            const isDraft = pr?.draft === true
+            const safeToMerge = !isDraft
+
+            try {
+              await github.rest.issues.getLabel({ owner, repo, name: label })
+            } catch (error) {
+              if (error.status !== 404) {
+                throw error
+              }
+
+              await github.rest.issues.createLabel({
+                owner,
+                repo,
+                name: label,
+                color: '0e8a16',
+                description: 'Dependabot updates that can merge after checks pass',
+              })
+            }
+
+            if (safeToMerge) {
+              await github.rest.issues.addLabels({
+                owner,
+                repo,
+                issue_number,
+                labels: [label],
+              })
+              core.info(`Added ${label} to PR #${issue_number}`)
+              return
+            }
+
+            try {
+              await github.rest.issues.removeLabel({
+                owner,
+                repo,
+                issue_number,
+                name: label,
+              })
+              core.info(`Removed ${label} from PR #${issue_number}`)
+            } catch (error) {
+              if (error.status !== 404) {
+                throw error
+              }
+              core.info(`Label ${label} not present on PR #${issue_number}`)
+            }
+
+  merge-when-green:
+    name: Merge labeled dependency PRs
+    if: >-
+      ${{
+        github.event_name == 'workflow_run' &&
+        github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.pull_requests[0] &&
+        contains(fromJSON('["pull_request","push"]'), github.event.workflow_run.event)
+      }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Merge safe updates once all checks pass
+        uses: actions/github-script@v8
+        env:
+          AUTO_MERGE_LABEL: dependencies:auto-merge
+        with:
+          script: |
+            const owner = context.repo.owner
+            const repo = context.repo.repo
+            const run = context.payload.workflow_run
+            const pullRequest = run.pull_requests?.[0]
+
+            if (!pullRequest) {
+              core.info('No pull request is attached to this workflow run.')
+              return
+            }
+
+            const prNumber = pullRequest.number
+            const label = process.env.AUTO_MERGE_LABEL
+
+            const { data: pr } = await github.rest.pulls.get({
+              owner,
+              repo,
+              pull_number: prNumber,
+            })
+
+            if (pr.state !== 'open') {
+              core.info(`PR #${prNumber} is already ${pr.state}.`)
+              return
+            }
+
+            if (pr.draft) {
+              core.info(`PR #${prNumber} is still a draft.`)
+              return
+            }
+
+            if (pr.user?.login !== 'dependabot[bot]') {
+              core.info(`PR #${prNumber} was not opened by Dependabot.`)
+              return
+            }
+
+            if (!pr.labels.some((item) => item.name === label)) {
+              core.info(`PR #${prNumber} is not marked with ${label}.`)
+              return
+            }
+
+            if (pr.head.sha !== run.head_sha) {
+              core.info(`PR #${prNumber} has moved on from ${run.head_sha}; skipping stale run.`)
+              return
+            }
+
+            const { data: checkRuns } = await github.rest.checks.listForRef({
+              owner,
+              repo,
+              ref: pr.head.sha,
+              per_page: 100,
+            })
+
+            const unfinished = checkRuns.check_runs.filter((check) => check.status !== 'completed')
+            if (unfinished.length > 0) {
+              core.info(`PR #${prNumber} still has ${unfinished.length} check run(s) in progress.`)
+              return
+            }
+
+            const failing = checkRuns.check_runs.filter(
+              (check) => !['success', 'neutral', 'skipped'].includes(check.conclusion ?? ''),
+            )
+
+            if (failing.length > 0) {
+              core.info(
+                `PR #${prNumber} has failing check runs: ${failing.map((check) => check.name).join(', ')}`,
+              )
+              return
+            }
+
+            await github.rest.pulls.merge({
+              owner,
+              repo,
+              pull_number: prNumber,
+              sha: pr.head.sha,
+              merge_method: 'squash',
+            })
+
+            core.info(`Merged Dependabot PR #${prNumber}.`)
+
+  label-and-merge-all:
+    name: Label and merge all open Dependabot PRs
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Label all open Dependabot PRs
+        uses: actions/github-script@v8
+        env:
+          AUTO_MERGE_LABEL: dependencies:auto-merge
+        with:
+          script: |
+            const owner = context.repo.owner
+            const repo = context.repo.repo
+            const label = process.env.AUTO_MERGE_LABEL
+
+            try {
+              await github.rest.issues.getLabel({ owner, repo, name: label })
+            } catch (error) {
+              if (error.status !== 404) {
+                throw error
+              }
+
+              await github.rest.issues.createLabel({
+                owner,
+                repo,
+                name: label,
+                color: '0e8a16',
+                description: 'Dependabot updates that can merge after checks pass',
+              })
+            }
+
+            const { data: pulls } = await github.rest.pulls.list({
+              owner,
+              repo,
+              state: 'open',
+              per_page: 100,
+            })
+
+            const dependabotPRs = pulls.filter(
+              (pr) => pr.user?.login === 'dependabot[bot]' && !pr.draft,
+            )
+
+            if (dependabotPRs.length === 0) {
+              core.info('No open non-draft Dependabot PRs found.')
+              return
+            }
+
+            for (const pr of dependabotPRs) {
+              await github.rest.issues.addLabels({
+                owner,
+                repo,
+                issue_number: pr.number,
+                labels: [label],
+              })
+              core.info(`Added ${label} to PR #${pr.number} ("${pr.title}")`)
+            }
+
+      - name: Merge labeled Dependabot PRs with passing checks
+        uses: actions/github-script@v8
+        env:
+          AUTO_MERGE_LABEL: dependencies:auto-merge
+        with:
+          script: |
+            const owner = context.repo.owner
+            const repo = context.repo.repo
+            const label = process.env.AUTO_MERGE_LABEL
+
+            const { data: pulls } = await github.rest.pulls.list({
+              owner,
+              repo,
+              state: 'open',
+              per_page: 100,
+            })
+
+            const candidates = pulls.filter(
+              (pr) =>
+                pr.user?.login === 'dependabot[bot]' &&
+                !pr.draft &&
+                pr.labels.some((l) => l.name === label),
+            )
+
+            if (candidates.length === 0) {
+              core.info('No labeled Dependabot PRs found to merge.')
+              return
+            }
+
+            for (const pr of candidates) {
+              const { data: checkRuns } = await github.rest.checks.listForRef({
+                owner,
+                repo,
+                ref: pr.head.sha,
+                per_page: 100,
+              })
+
+              const unfinished = checkRuns.check_runs.filter(
+                (check) => check.status !== 'completed',
+              )
+
+              if (unfinished.length > 0) {
+                core.info(
+                  `PR #${pr.number} still has ${unfinished.length} check run(s) in progress — skipping.`,
+                )
+                continue
+              }
+
+              const failing = checkRuns.check_runs.filter(
+                (check) => !['success', 'neutral', 'skipped'].includes(check.conclusion ?? ''),
+              )
+
+              if (failing.length > 0) {
+                core.info(
+                  `PR #${pr.number} has failing check runs: ${failing.map((c) => c.name).join(', ')} — skipping.`,
+                )
+                continue
+              }
+
+              try {
+                await github.rest.pulls.merge({
+                  owner,
+                  repo,
+                  pull_number: pr.number,
+                  sha: pr.head.sha,
+                  merge_method: 'squash',
+                })
+                core.info(`Merged Dependabot PR #${pr.number} ("${pr.title}").`)
+              } catch (error) {
+                core.warning(`Failed to merge PR #${pr.number}: ${error.message}`)
+              }
+            }

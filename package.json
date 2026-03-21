@@ -1,0 +1,36 @@
+{
+  "name": "xdrop",
+  "description": "Open source file transfer app that encrypts files in your browser and keeps plaintext file names, contents, and keys off the server",
+  "private": true,
+  "license": "AGPL-3.0-only",
+  "homepage": "https://github.com/xixu-me/xdrop",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/xixu-me/xdrop.git"
+  },
+  "bugs": {
+    "url": "https://github.com/xixu-me/xdrop/issues"
+  },
+  "workspaces": [
+    "apps/web",
+    "packages/shared"
+  ],
+  "devDependencies": {
+    "@playwright/test": "^1.54.2",
+    "prettier": "^3.6.2"
+  },
+  "scripts": {
+    "dev:web": "bun --filter=\"./apps/web\" run dev",
+    "build:web": "bun --filter=\"./apps/web\" run build",
+    "lint:web": "bun --filter=\"./apps/web\" run lint",
+    "format": "bun run format:prettier && bun ./scripts/check-go-format.mjs --write",
+    "format:check": "bun run format:check:prettier && bun ./scripts/check-go-format.mjs",
+    "format:prettier": "prettier --write \"**/*.{js,jsx,ts,tsx,mjs,cjs,json,css,md,html,yml,yaml}\"",
+    "format:check:prettier": "prettier --check \"**/*.{js,jsx,ts,tsx,mjs,cjs,json,css,md,html,yml,yaml}\"",
+    "test:web": "bun --filter=\"./apps/web\" run test",
+    "test:web:coverage": "bun --filter=\"./apps/web\" run test:coverage",
+    "typecheck:web": "bun --filter=\"./apps/web\" run typecheck",
+    "test:e2e": "bunx playwright test",
+    "test:e2e:install": "bunx playwright install chromium"
+  }
+}

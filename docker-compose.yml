@@ -1,0 +1,86 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: xdrop
+      POSTGRES_USER: xdrop
+      POSTGRES_PASSWORD: xdrop
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U xdrop -d xdrop']
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  minio:
+    image: minio/minio:latest
+    restart: unless-stopped
+    command: server /data --console-address :9001
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - '9000:9000'
+      - '9001:9001'
+    volumes:
+      - minio-data:/data
+
+  minio-setup:
+    image: minio/mc:latest
+    depends_on:
+      - minio
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+      S3_BUCKET: xdrop
+    volumes:
+      - ./infra/minio/init.sh:/init.sh:ro
+    entrypoint: ['/bin/sh', '/init.sh']
+
+  xdrop:
+    image: ${XDROP_IMAGE:-ghcr.io/xixu-me/xdrop:latest}
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio-setup:
+        condition: service_completed_successfully
+    environment:
+      API_ADDR: :8080
+      DATABASE_URL: postgres://xdrop:xdrop@postgres:5432/xdrop?sslmode=disable
+      REDIS_ADDR: redis:6379
+      REDIS_PASSWORD:
+      REDIS_DB: 0
+      S3_ENDPOINT: http://minio:9000
+      S3_PUBLIC_ENDPOINT: http://localhost:8080
+      S3_REGION: us-east-1
+      S3_BUCKET: xdrop
+      S3_ACCESS_KEY: minioadmin
+      S3_SECRET_KEY: minioadmin
+      S3_USE_SSL: 'false'
+      ALLOWED_ORIGINS: http://localhost:8080
+      PRESIGN_TTL_SECONDS: 300
+      DEFAULT_EXPIRY_SECONDS: 3600
+      CLEANUP_INTERVAL: 2m
+    ports:
+      - '8080:80'
+
+volumes:
+  postgres-data:
+  redis-data:
+  minio-data:

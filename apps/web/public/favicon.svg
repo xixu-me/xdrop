@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="none">
+  <defs>
+    <linearGradient id="xdrop-favicon-shell-light" x1="36" y1="20" x2="220" y2="236" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#171C17" />
+      <stop offset="0.58" stop-color="#101410" />
+      <stop offset="1" stop-color="#0A0D0A" />
+    </linearGradient>
+    <radialGradient id="xdrop-favicon-shell-glow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(92 72) rotate(41) scale(146 134)">
+      <stop stop-color="#F7F2E8" stop-opacity="0.08" />
+      <stop offset="0.34" stop-color="#8CB5FF" stop-opacity="0.08" />
+      <stop offset="1" stop-color="#8CB5FF" stop-opacity="0" />
+    </radialGradient>
+    <linearGradient id="xdrop-favicon-cream-light" x1="94" y1="84" x2="184" y2="176" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFF9EE" />
+      <stop offset="0.72" stop-color="#F7F2E8" />
+      <stop offset="1" stop-color="#E8DDCB" />
+    </linearGradient>
+    <linearGradient id="xdrop-favicon-blue-light" x1="86" y1="78" x2="180" y2="182" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2D66DE" />
+      <stop offset="0.7" stop-color="#0D4FCF" />
+      <stop offset="1" stop-color="#083B9F" />
+    </linearGradient>
+  </defs>
+  <rect width="256" height="256" rx="56" fill="url(#xdrop-favicon-shell-light)" />
+  <rect width="256" height="256" rx="56" fill="url(#xdrop-favicon-shell-glow)" />
+  <g transform="translate(128 128) scale(1.14) translate(-128 -128)">
+    <g transform="rotate(-45 128 128)">
+      <rect x="70" y="108" width="116" height="40" rx="18" fill="url(#xdrop-favicon-cream-light)" />
+    </g>
+    <g transform="rotate(45 128 128)">
+      <rect x="70" y="108" width="116" height="40" rx="18" fill="url(#xdrop-favicon-blue-light)" />
+    </g>
+    <path d="M128 98L158 128L128 158L98 128L128 98Z" fill="#0E120E" />
+  </g>
+</svg>
