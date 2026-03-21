@@ -549,7 +549,7 @@ describe('TransferProvider actions', () => {
     await waitFor(() => {
       expect(
         screen.getByText(
-          't1:paused:This page was closed or refreshed. Upload will continue automatically when this browser returns.',
+          't1:paused:This page was closed or refreshed. Upload will continue automatically when you return here in the same browser on this device.',
         ),
       ).toBeInTheDocument()
     })

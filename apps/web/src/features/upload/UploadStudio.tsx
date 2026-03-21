@@ -246,6 +246,19 @@ export function UploadStudio() {
             <p className="eyebrow">End-to-end encryption</p>
             <h1 className="page-hero-title">Encrypted file transfer.</h1>
             <p className="lead">{PROJECT_ONE_LINER}</p>
+            <p className="muted">
+              Use Xdrop in the browser for normal sharing, or{' '}
+              <a
+                className="inline-link"
+                href="https://github.com/xixu-me/xdrop?tab=readme-ov-file#use-via-agents"
+                rel="noreferrer"
+                target="_blank"
+              >
+                through an agent
+              </a>{' '}
+              when you need to move files out of a cloud server, remote container, or automated
+              terminal workflow.
+            </p>
           </div>
         </div>
         <div
@@ -265,8 +278,8 @@ export function UploadStudio() {
         >
           <div className="dropzone-shell">
             <p className="muted dropzone-copy">
-              Drop files or a folder. Names, paths, and file contents are encrypted in this browser
-              before upload.
+              Use the web app to drop files or a folder. Names, paths, and file contents are
+              encrypted in this browser before upload.
             </p>
             {uploadError ? <p className="warning dropzone-copy">{uploadError}</p> : null}
             <div className="button-row">
@@ -401,8 +414,9 @@ export function UploadStudio() {
           </div>
         </label>
         <p className="warning">
-          Uploads continue automatically when this browser returns after a refresh or reopen.
-          Privacy mode keeps less sensitive state on this device, with fewer local controls.
+          Uploads continue automatically when you return here in the same browser on this device
+          after a refresh or reopen. Privacy mode keeps less sensitive state on this device, with
+          fewer local controls.
         </p>
       </Card>
 

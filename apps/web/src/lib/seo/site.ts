@@ -4,9 +4,26 @@
 
 export const SITE_NAME = 'Xdrop'
 export const PROJECT_ONE_LINER =
-  'Xdrop is an open source file transfer app that encrypts files in your browser and keeps plaintext file names, contents, and keys off the server.'
-export const DEFAULT_SEO_TITLE = 'Open Source Encrypted File Transfer in the Browser | Xdrop'
+  'Xdrop is an open source encrypted file transfer app for browsers and agent-driven terminal workflows, keeping plaintext file names, contents, and keys off the server.'
+export const SHORT_POSITIONING_SUMMARY =
+  'Browser-first encrypted file transfer, with agent-ready terminal workflows.'
+export const TERMINAL_SUPPORT_BLURB =
+  'Use Xdrop in the browser for normal sharing, or through an agent when you need to move files out of a cloud server, remote container, or automated terminal workflow.'
+export const DEFAULT_SEO_TITLE =
+  'Open Source Encrypted File Transfer for Browsers and Agents | Xdrop'
 export const DEFAULT_SEO_DESCRIPTION = PROJECT_ONE_LINER
+export const HISTORY_PAGE_TITLE = 'Manage Transfers on This Device | Xdrop'
+export const HISTORY_PAGE_DESCRIPTION =
+  'Manage encrypted transfers stored in this browser on this device. There is no account or cross-device history.'
+export const SHARE_PAGE_TITLE = 'Share the Full Link | Xdrop'
+export const SHARE_PAGE_DESCRIPTION =
+  'Review upload status and copy the full share link for a transfer staged in this browser on this device.'
+export const RECEIVE_PAGE_TITLE = 'Download and Decrypt in the Browser | Xdrop'
+export const RECEIVE_PAGE_DESCRIPTION =
+  'Download files from this transfer and decrypt them in the browser. The decryption key stays in the share link fragment.'
+export const NOT_FOUND_PAGE_TITLE = 'Page Not Found | Xdrop'
+export const NOT_FOUND_PAGE_DESCRIPTION =
+  'The address does not map to a page in Xdrop. If this came from a shared transfer, ask for the full URL, including the #k=... decryption fragment.'
 export const DEFAULT_OG_IMAGE_PATH = '/brand-lockup-horizontal.png'
 export const DEFAULT_OG_IMAGE_ALT = 'Xdrop horizontal brand lockup'
 export const DEFAULT_LOGO_PATH = '/brand-symbol-512.png'

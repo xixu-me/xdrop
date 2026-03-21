@@ -37,8 +37,8 @@
   English | <a href="./README.zh.md">汉语</a>
 </p>
 
-Xdrop is an open source file transfer app that encrypts files in your browser and keeps
-plaintext file names, contents, and keys off the server.
+Xdrop is an open source encrypted file transfer app for browsers and agent-driven terminal
+workflows, keeping plaintext file names, contents, and keys off the server.
 
 ## Highlights
 
@@ -47,6 +47,35 @@ plaintext file names, contents, and keys off the server.
 - Resumable uploads with browser-local state for interrupted transfers.
 - Expiring links, sender-side management, and optional privacy mode after upload.
 - S3-compatible object storage support with PostgreSQL and Redis on the backend.
+
+## Use Via Agents
+
+You can also use Xdrop through an agent by installing the bundled skill:
+
+```bash
+npx skills add https://github.com/xixu-me/xdrop/tree/main/skills/xdrop
+```
+
+After that, the agent can use Xdrop from the terminal to:
+
+- Upload local files or directories and return an encrypted share link.
+- Download a full Xdrop share link, including `#k=...`, and decrypt it locally.
+- Automate repeatable handoff flows without switching to the browser UI.
+
+Useful cases:
+
+- On a cloud server, ask the agent to upload build artifacts, logs, or backups to your Xdrop
+  instance and send back a temporary link.
+- In a remote dev container or CI-like environment, ask the agent to package a directory and move
+  it through Xdrop instead of setting up ad hoc SCP or public object storage access.
+- On your local machine, hand the agent a full Xdrop link and ask it to download the files into a
+  specific directory.
+
+Example prompts:
+
+- `Upload ./dist to https://xdrop.example.com and give me a 1-hour Xdrop link.`
+- `On this VM, send /var/log/myapp through Xdrop so I can inspect it locally.`
+- `Download this Xdrop link into ~/downloads and keep the original folder structure.`
 
 ## How It Works
 

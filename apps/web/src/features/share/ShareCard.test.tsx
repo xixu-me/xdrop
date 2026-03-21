@@ -109,7 +109,9 @@ describe('ShareCard', () => {
     )
 
     expect(screen.getByText('Transfer not on this device')).toBeInTheDocument()
-    expect(screen.getByText('Open it in the browser that created it.')).toBeInTheDocument()
+    expect(
+      screen.getByText('Open it in the same browser on the device that created it.'),
+    ).toBeInTheDocument()
   })
 
   it('copies the full link and resets the copied state', async () => {
@@ -310,7 +312,9 @@ describe('ShareCard', () => {
 
     expect(screen.getByText('25% uploaded')).toBeInTheDocument()
     expect(
-      screen.getByText('Upload will continue automatically when this browser returns.'),
+      screen.getByText(
+        'Upload will continue automatically when you return here in the same browser on this device.',
+      ),
     ).toBeInTheDocument()
     expect(screen.getByText(/Privacy mode removed local transfer controls/i)).toBeInTheDocument()
 
@@ -322,7 +326,7 @@ describe('ShareCard', () => {
     await act(async () => {
       await Promise.resolve()
     })
-    expect(screen.getByText('Upload stopped in this browser.')).toBeInTheDocument()
+    expect(screen.getByText('Upload stopped in this browser on this device.')).toBeInTheDocument()
 
     rerender(
       <MemoryRouter>

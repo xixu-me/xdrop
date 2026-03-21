@@ -858,7 +858,7 @@ h3 {
     0 18px 30px rgba(2, 5, 2, 0.18);
 }
 
-.dropzone > .warning {
+.dropzone-shell > .warning {
   margin-top: 0;
 }
 

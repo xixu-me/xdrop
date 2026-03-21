@@ -17,7 +17,7 @@ import { formatBytes } from '@/lib/files/formatBytes'
 import { safeDownloadName, sanitizePath } from '@/lib/files/paths'
 import { isAbortError, openSaveWritable, saveBlob, supportsStreamingSave } from '@/lib/files/save'
 import { formatLocalDateTime } from '@/lib/i18n/formatDateTime'
-import { PRIVATE_ROBOTS } from '@/lib/seo/site'
+import { PRIVATE_ROBOTS, RECEIVE_PAGE_DESCRIPTION, RECEIVE_PAGE_TITLE } from '@/lib/seo/site'
 import { usePageMetadata } from '@/lib/seo/usePageMetadata'
 
 type Props = {
@@ -49,9 +49,8 @@ export function ReceiveTransfer({ transferId }: Props) {
     activeDownload !== null || downloadProgress > 0 || Boolean(downloadError)
 
   usePageMetadata({
-    title: 'Download and Decrypt in the Browser | Xdrop',
-    description:
-      'Download files from this transfer and decrypt them in the browser. The decryption key stays in the share link fragment.',
+    title: RECEIVE_PAGE_TITLE,
+    description: RECEIVE_PAGE_DESCRIPTION,
     robots: PRIVATE_ROBOTS,
     exposeUrl: false,
   })

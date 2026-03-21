@@ -360,7 +360,7 @@ describe('TransferContext helpers', () => {
       makeTransferRecord('paused', {
         id: 't2',
         lastError:
-          'This page was closed or refreshed. Upload will continue automatically when this browser returns.',
+          'This page was closed or refreshed. Upload will continue automatically when you return here in the same browser on this device.',
       }),
       makeTransferRecord('ready', { id: 't3' }),
     ])
@@ -370,7 +370,7 @@ describe('TransferContext helpers', () => {
       expect.objectContaining({
         id: 't1',
         lastError:
-          'This page was closed or refreshed. Upload will continue automatically when this browser returns.',
+          'This page was closed or refreshed. Upload will continue automatically when you return here in the same browser on this device.',
         status: 'paused',
       }),
     )

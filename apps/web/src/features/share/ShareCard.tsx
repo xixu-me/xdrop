@@ -115,7 +115,7 @@ export function ShareCard({ transfer }: Props) {
       <PageStateCard
         eyebrow="Share"
         title="Transfer not on this device"
-        body="Open it in the browser that created it."
+        body="Open it in the same browser on the device that created it."
       />
     )
   }
@@ -260,9 +260,9 @@ function shareStatusCopy(status: LocalTransferRecord['status']) {
     case 'ready':
       return undefined
     case 'paused':
-      return 'Upload will continue automatically when this browser returns.'
+      return 'Upload will continue automatically when you return here in the same browser on this device.'
     case 'failed':
-      return 'Upload stopped in this browser.'
+      return 'Upload stopped in this browser on this device.'
     case 'deleted':
       return 'This transfer was deleted.'
     default:

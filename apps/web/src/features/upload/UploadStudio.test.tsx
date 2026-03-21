@@ -160,6 +160,27 @@ describe('UploadStudio', () => {
     draftState.sources = []
   })
 
+  it('shows browser-first positioning with agent workflow support copy', async () => {
+    renderStudio()
+
+    expect(await screen.findByText('Encrypted file transfer.')).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        /agent-driven terminal workflows, keeping plaintext file names, contents, and keys off the server\./,
+      ),
+    ).toBeInTheDocument()
+    expect(screen.getByText(/Use Xdrop in the browser for normal sharing, or/i)).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'through an agent' })).toHaveAttribute(
+      'href',
+      'https://github.com/xixu-me/xdrop?tab=readme-ov-file#use-via-agents',
+    )
+    expect(
+      screen.getByText(
+        /Use the web app to drop files or a folder\. Names, paths, and file contents are encrypted in this browser before upload\./,
+      ),
+    ).toBeInTheDocument()
+  })
+
   it('blocks selections that exceed the transfer size limit', async () => {
     const { container } = renderStudio()
 

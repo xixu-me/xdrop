@@ -235,7 +235,7 @@ export function HistoryBoard() {
         {pendingDeleteTransferId === transfer.id ? (
           <p aria-live="polite" className="warning">
             {canManageTransfer
-              ? 'Confirm delete to remove this transfer from storage and from this device.'
+              ? 'Confirm delete to remove this transfer from this device.'
               : 'Confirm forget to remove this local record from this device.'}
           </p>
         ) : null}

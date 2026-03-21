@@ -27,7 +27,7 @@ describe('usePageMetadata', () => {
     render(
       <MemoryRouter initialEntries={['/']}>
         <MetadataProbe
-          title="Open Source Encrypted File Transfer in the Browser | Xdrop"
+          title="Open Source Encrypted File Transfer for Browsers and Agents | Xdrop"
           description="SEO test description"
           structuredData={{
             '@context': 'https://schema.org',
@@ -38,11 +38,13 @@ describe('usePageMetadata', () => {
       </MemoryRouter>,
     )
 
-    expect(document.title).toBe('Open Source Encrypted File Transfer in the Browser | Xdrop')
+    expect(document.title).toBe(
+      'Open Source Encrypted File Transfer for Browsers and Agents | Xdrop',
+    )
     expect(readMetaByName('description')).toBe('SEO test description')
     expect(readMetaByName('robots')).toContain('index, follow')
     expect(readMetaByProperty('og:title')).toBe(
-      'Open Source Encrypted File Transfer in the Browser | Xdrop',
+      'Open Source Encrypted File Transfer for Browsers and Agents | Xdrop',
     )
     expect(readMetaByProperty('og:url')).toBe(new URL('/', window.location.origin).toString())
     expect(readCanonical()).toBe(new URL('/', window.location.origin).toString())
@@ -89,7 +91,7 @@ describe('usePageMetadata', () => {
     expect(document.head.querySelectorAll('meta[name="description"]')).toHaveLength(1)
     expect(document.head.querySelectorAll('link[rel="canonical"]')).toHaveLength(1)
     expect(readMetaByName('description')).toContain(
-      'Xdrop is an open source file transfer app that encrypts files in your browser',
+      'Xdrop is an open source encrypted file transfer app for browsers and agent-driven terminal workflows',
     )
     expect(readMetaByName('robots')).toContain('index, follow')
     expect(readMetaByProperty('og:type')).toBe('website')

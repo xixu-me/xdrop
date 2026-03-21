@@ -226,7 +226,7 @@ describe('TransferProvider', () => {
       't1',
       createTransferRecord('paused', {
         lastError:
-          'This page was closed or refreshed. Upload will continue automatically when this browser returns.',
+          'This page was closed or refreshed. Upload will continue automatically when you return here in the same browser on this device.',
       }),
     )
     sourcesStore.set('t1:file-1', createSourceRecord())

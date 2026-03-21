@@ -14,6 +14,8 @@ describe('NotFoundPage', () => {
 
     expect(screen.getByRole('heading', { name: 'This page was not found.' })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Try these checks' })).toBeInTheDocument()
-    expect(screen.getByText('Try the browser that created the transfer')).toBeInTheDocument()
+    expect(
+      screen.getByText('Try the device and browser that created the transfer'),
+    ).toBeInTheDocument()
   })
 })

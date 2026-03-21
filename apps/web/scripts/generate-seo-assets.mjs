@@ -18,9 +18,21 @@ const DEFAULT_ROBOTS =
 const PRIVATE_ROBOTS = 'noindex, nofollow, noarchive, nosnippet'
 const STRUCTURED_DATA_ID = 'xdrop-structured-data-static'
 
-const HOME_TITLE = 'Open Source Encrypted File Transfer in the Browser | Xdrop'
+const HOME_TITLE = 'Open Source Encrypted File Transfer for Browsers and Agents | Xdrop'
 const HOME_DESCRIPTION =
-  'Xdrop is an open source file transfer app that encrypts files in your browser and keeps plaintext file names, contents, and keys off the server.'
+  'Xdrop is an open source encrypted file transfer app for browsers and agent-driven terminal workflows, keeping plaintext file names, contents, and keys off the server.'
+const HISTORY_PAGE_TITLE = 'Manage Transfers on This Device | Xdrop'
+const HISTORY_PAGE_DESCRIPTION =
+  'Manage encrypted transfers stored in this browser on this device. There is no account or cross-device history.'
+const SHARE_PAGE_TITLE = 'Share the Full Link | Xdrop'
+const SHARE_PAGE_DESCRIPTION =
+  'Review upload status and copy the full share link for a transfer staged in this browser on this device.'
+const RECEIVE_PAGE_TITLE = 'Download and Decrypt in the Browser | Xdrop'
+const RECEIVE_PAGE_DESCRIPTION =
+  'Download files from this transfer and decrypt them in the browser. The decryption key stays in the share link fragment.'
+const NOT_FOUND_PAGE_TITLE = 'Page Not Found | Xdrop'
+const NOT_FOUND_PAGE_DESCRIPTION =
+  'The address does not map to a page in Xdrop. If this came from a shared transfer, ask for the full URL, including the #k=... decryption fragment.'
 
 const routeShells = [
   {
@@ -34,35 +46,31 @@ const routeShells = [
   {
     outputPath: 'transfers/index.html',
     pagePath: '/transfers',
-    title: 'Manage Transfers on This Device | Xdrop',
-    description:
-      'Manage encrypted transfers stored in this browser. There is no account or cross-device history.',
+    title: HISTORY_PAGE_TITLE,
+    description: HISTORY_PAGE_DESCRIPTION,
     robots: PRIVATE_ROBOTS,
     exposeUrl: false,
   },
   {
     outputPath: 'share/index.html',
     pagePath: '/share/',
-    title: 'Share the Full Link | Xdrop',
-    description:
-      'Review upload status and copy the full share link for a browser-encrypted transfer.',
+    title: SHARE_PAGE_TITLE,
+    description: SHARE_PAGE_DESCRIPTION,
     robots: PRIVATE_ROBOTS,
     exposeUrl: false,
   },
   {
     outputPath: 't/index.html',
     pagePath: '/t/',
-    title: 'Download and Decrypt in the Browser | Xdrop',
-    description:
-      'Download files from this transfer and decrypt them in the browser. The decryption key stays in the share link fragment.',
+    title: RECEIVE_PAGE_TITLE,
+    description: RECEIVE_PAGE_DESCRIPTION,
     robots: PRIVATE_ROBOTS,
     exposeUrl: false,
   },
   {
     outputPath: 'not-found/index.html',
-    title: 'Page Not Found | Xdrop',
-    description:
-      'The address does not map to a page in Xdrop. If this came from a shared transfer, ask for the full URL, including the #k=... decryption fragment.',
+    title: NOT_FOUND_PAGE_TITLE,
+    description: NOT_FOUND_PAGE_DESCRIPTION,
     robots: PRIVATE_ROBOTS,
     exposeUrl: false,
   },

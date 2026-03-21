@@ -20,7 +20,7 @@ export function Shell() {
           />
           <span className="brand-copy">
             <span className="brand-mark">Xdrop</span>
-            <span className="brand-note">Browser-encrypted transfer</span>
+            <span className="brand-note">Encrypted file transfer</span>
           </span>
         </NavLink>
         <nav className="nav">

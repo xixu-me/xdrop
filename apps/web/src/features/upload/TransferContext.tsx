@@ -74,7 +74,7 @@ type UploadSource = PersistedSourceRecord & {
 
 /** This message marks transfers that should resume automatically after a page return. */
 const RESUME_AFTER_NAVIGATION_MESSAGE =
-  'This page was closed or refreshed. Upload will continue automatically when this browser returns.'
+  'This page was closed or refreshed. Upload will continue automatically when you return here in the same browser on this device.'
 
 type TransferContextValue = {
   transfers: LocalTransferRecord[]

@@ -198,7 +198,7 @@ describe('HistoryBoard', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Delete' }))
     expect(
-      screen.getByText(/Confirm delete to remove this transfer from storage and from this device/i),
+      screen.getByText(/Confirm delete to remove this transfer from this device/i),
     ).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Confirm delete' }))
 

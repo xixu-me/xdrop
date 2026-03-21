@@ -1,13 +1,12 @@
 import { Card } from '@/components/ui/Card'
-import { PRIVATE_ROBOTS } from '@/lib/seo/site'
+import { NOT_FOUND_PAGE_DESCRIPTION, NOT_FOUND_PAGE_TITLE, PRIVATE_ROBOTS } from '@/lib/seo/site'
 import { usePageMetadata } from '@/lib/seo/usePageMetadata'
 
 /** NotFoundPage explains the most common ways secure share links break. */
 export function NotFoundPage() {
   usePageMetadata({
-    title: 'Page Not Found | Xdrop',
-    description:
-      'The address does not map to a page in Xdrop. If this came from a shared transfer, ask for the full URL, including the #k=... decryption fragment.',
+    title: NOT_FOUND_PAGE_TITLE,
+    description: NOT_FOUND_PAGE_DESCRIPTION,
     robots: PRIVATE_ROBOTS,
     exposeUrl: false,
   })
@@ -37,10 +36,10 @@ export function NotFoundPage() {
         <ul className="file-list">
           <li className="file-row not-found-tip">
             <div className="file-stack">
-              <strong>Try the browser that created the transfer</strong>
+              <strong>Try the device and browser that created the transfer</strong>
               <p className="muted">
-                Sender history and local transfer controls only exist on the device that created the
-                transfer.
+                Sender history and local transfer controls only exist in the browser that created
+                the transfer on that device.
               </p>
             </div>
           </li>
