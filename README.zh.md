@@ -258,7 +258,7 @@ xdrop.example.com {
 systemctl reload caddy
 ```
 
-栈启动后，访问 <https://xdrop.example.com>。
+栈启动后，访问 `https://xdrop.example.com`。
 
 ### 生产环境说明
 
