@@ -11,6 +11,7 @@ apps/web/dist/
 apps/web/node_modules/
 apps/api/bin/
 apps/api/.cache/
+apps/api/coverage
 apps/api/coverage.out
 tmp/
 output/
