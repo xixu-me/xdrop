@@ -19,7 +19,7 @@ export function NotFoundPage() {
           <h2>This page was not found.</h2>
           <p className="muted page-intro">
             The address does not map to a page in Xdrop. If this came from a shared transfer, ask
-            for the full URL, including the <code>#k=...</code> decryption fragment.
+            the sender to resend the complete share details.
           </p>
         </div>
       </Card>
@@ -47,8 +47,8 @@ export function NotFoundPage() {
             <div className="file-stack">
               <strong>Check the route family</strong>
               <p className="muted">
-                Shared downloads live under <code>/t/:transferId</code>. Sender history lives under{' '}
-                <code>/transfers</code>.
+                Shared downloads and sender history use different pages. Return to a known page and
+                open the transfer again from there.
               </p>
             </div>
           </li>

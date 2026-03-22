@@ -12,10 +12,10 @@ import {
 } from '@/lib/crypto/envelope'
 import { parseLinkKey } from '@/lib/crypto/urlKey'
 import { createDecryptedReadableStream, decryptFileToBlob } from '@/lib/download/decrypt'
-import { buildZipFromStreams, writeZipStream } from '@/lib/download/zip'
+import { buildZipFromStreams } from '@/lib/download/zip'
 import { formatBytes } from '@/lib/files/formatBytes'
 import { safeDownloadName, sanitizePath } from '@/lib/files/paths'
-import { isAbortError, openSaveWritable, saveBlob, supportsStreamingSave } from '@/lib/files/save'
+import { saveBlob } from '@/lib/files/save'
 import { formatLocalDateTime } from '@/lib/i18n/formatDateTime'
 import { PRIVATE_ROBOTS, RECEIVE_PAGE_DESCRIPTION, RECEIVE_PAGE_TITLE } from '@/lib/seo/site'
 import { usePageMetadata } from '@/lib/seo/usePageMetadata'
@@ -94,7 +94,7 @@ export function ReceiveTransfer({ transferId }: Props) {
     })()
   }, [fragmentKey, transferId])
 
-  /** downloadFile streams to disk when possible and falls back to an in-memory Blob otherwise. */
+  /** downloadFile decrypts to a Blob and hands it to the browser download manager. */
   const downloadFile = async (file: ManifestFileEntry) => {
     if (!rootKey) {
       return
@@ -115,34 +115,18 @@ export function ReceiveTransfer({ transferId }: Props) {
           setDownloadProgress(Math.round((completedBytes / Math.max(totalBytes, 1)) * 100)),
       }
 
-      if (supportsStreamingSave()) {
-        const writable = await openSaveWritable(filename, {
-          mimeType: file.mimeType || 'application/octet-stream',
-        })
-        if (writable) {
-          await createDecryptedReadableStream(downloadArgs).pipeTo(writable)
-        } else {
-          const blob = await decryptFileToBlob(downloadArgs)
-          saveBlob(blob, filename)
-        }
-      } else {
-        const blob = await decryptFileToBlob(downloadArgs)
-        saveBlob(blob, filename)
-      }
+      const blob = await decryptFileToBlob(downloadArgs)
+      saveBlob(blob, filename)
 
       setDownloadProgress(100)
     } catch (caughtError) {
-      if (isAbortError(caughtError)) {
-        setDownloadProgress(0)
-        return
-      }
       setDownloadError(caughtError instanceof Error ? caughtError.message : 'Download failed.')
     } finally {
       setActiveDownload((current) => (current === file.fileId ? null : current))
     }
   }
 
-  /** downloadAll streams ZIP creation to disk when possible and avoids per-file buffering. */
+  /** downloadAll creates one ZIP Blob and hands it to the browser download manager. */
   const downloadAll = async () => {
     if (!manifest || !rootKey) {
       return
@@ -176,25 +160,11 @@ export function ReceiveTransfer({ transferId }: Props) {
           },
         }))
 
-      if (supportsStreamingSave()) {
-        const writable = await openSaveWritable(zipName, { mimeType: 'application/zip' })
-        if (writable) {
-          await writeZipStream(createZipEntries(), writable)
-        } else {
-          const zip = await buildZipFromStreams(createZipEntries())
-          saveBlob(zip, zipName)
-        }
-      } else {
-        const zip = await buildZipFromStreams(createZipEntries())
-        saveBlob(zip, zipName)
-      }
+      const zip = await buildZipFromStreams(createZipEntries())
+      saveBlob(zip, zipName)
 
       setDownloadProgress(100)
     } catch (caughtError) {
-      if (isAbortError(caughtError)) {
-        setDownloadProgress(0)
-        return
-      }
       setDownloadError(caughtError instanceof Error ? caughtError.message : 'Download failed.')
     } finally {
       setActiveDownload((current) => (current === 'zip' ? null : current))

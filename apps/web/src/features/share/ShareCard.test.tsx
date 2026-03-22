@@ -45,10 +45,13 @@ function createTransfer(
 }
 
 describe('ShareCard', () => {
+  const extendTransferMock = vi.fn(async () => {})
+
   beforeEach(() => {
     vi.useFakeTimers()
     vi.setSystemTime(new Date('2026-03-20T10:00:00.000Z'))
     toDataUrlMock.mockClear()
+    extendTransferMock.mockClear()
     Object.assign(navigator, {
       clipboard: {
         writeText: vi.fn(async () => {}),
@@ -66,6 +69,7 @@ describe('ShareCard', () => {
       <MemoryRouter>
         <ShareCard
           transfer={createTransfer('active-1', 'Active transfer', '2026-03-21T10:00:00.000Z')}
+          onExtendTransfer={extendTransferMock}
         />
       </MemoryRouter>,
     )
@@ -74,10 +78,15 @@ describe('ShareCard', () => {
       await Promise.resolve()
     })
 
-    expect(screen.getByRole('heading', { name: /Share the full link/i })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /Share this transfer/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Copy link/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Share link/i })).toBeInTheDocument()
-    expect(screen.getByDisplayValue('https://example.com/t/active-1#k=test')).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: /Set expiry to 1 week from now/i }),
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByDisplayValue('https://example.com/t/active-1#k=test'),
+    ).not.toBeInTheDocument()
     expect(screen.getByAltText('Transfer QR code')).toBeInTheDocument()
     expect(toDataUrlMock).toHaveBeenCalledTimes(1)
   })
@@ -119,6 +128,7 @@ describe('ShareCard', () => {
       <MemoryRouter>
         <ShareCard
           transfer={createTransfer('active-2', 'Copied transfer', '2026-03-21T10:00:00.000Z')}
+          onExtendTransfer={extendTransferMock}
         />
       </MemoryRouter>,
     )
@@ -153,6 +163,7 @@ describe('ShareCard', () => {
       <MemoryRouter>
         <ShareCard
           transfer={createTransfer('active-3', 'Shared transfer', '2026-03-21T10:00:00.000Z')}
+          onExtendTransfer={extendTransferMock}
         />
       </MemoryRouter>,
     )
@@ -180,6 +191,7 @@ describe('ShareCard', () => {
       <MemoryRouter>
         <ShareCard
           transfer={createTransfer('active-4', 'Fallback transfer', '2026-03-21T10:00:00.000Z')}
+          onExtendTransfer={extendTransferMock}
         />
       </MemoryRouter>,
     )
@@ -200,7 +212,7 @@ describe('ShareCard', () => {
     expect(screen.getByRole('button', { name: 'Copied' })).toBeInTheDocument()
   })
 
-  it('shows a manual-copy fallback when clipboard access fails', async () => {
+  it('shows a retry-focused fallback when clipboard access fails', async () => {
     Object.assign(navigator, {
       clipboard: {
         writeText: vi.fn(async () => {
@@ -213,6 +225,7 @@ describe('ShareCard', () => {
       <MemoryRouter>
         <ShareCard
           transfer={createTransfer('active-6', 'Clipboard fallback', '2026-03-21T10:00:00.000Z')}
+          onExtendTransfer={extendTransferMock}
         />
       </MemoryRouter>,
     )
@@ -227,8 +240,12 @@ describe('ShareCard', () => {
       await Promise.resolve()
     })
 
-    expect(screen.getByText(/Select the full link below to copy it manually/i)).toBeInTheDocument()
-    expect(screen.getByDisplayValue('https://example.com/t/active-6#k=test')).toBeInTheDocument()
+    expect(
+      screen.getByText(/Use your browser share tools or try again on this device/i),
+    ).toBeInTheDocument()
+    expect(
+      screen.queryByDisplayValue('https://example.com/t/active-6#k=test'),
+    ).not.toBeInTheDocument()
   })
 
   it('ignores canceled share-sheet requests without surfacing an error', async () => {
@@ -241,6 +258,7 @@ describe('ShareCard', () => {
       <MemoryRouter>
         <ShareCard
           transfer={createTransfer('active-7', 'Dismissed share', '2026-03-21T10:00:00.000Z')}
+          onExtendTransfer={extendTransferMock}
         />
       </MemoryRouter>,
     )
@@ -302,7 +320,7 @@ describe('ShareCard', () => {
 
     const { rerender } = render(
       <MemoryRouter>
-        <ShareCard transfer={pausedTransfer} />
+        <ShareCard transfer={pausedTransfer} onExtendTransfer={extendTransferMock} />
       </MemoryRouter>,
     )
 
@@ -320,7 +338,7 @@ describe('ShareCard', () => {
 
     rerender(
       <MemoryRouter>
-        <ShareCard transfer={failedTransfer} />
+        <ShareCard transfer={failedTransfer} onExtendTransfer={extendTransferMock} />
       </MemoryRouter>,
     )
     await act(async () => {
@@ -330,7 +348,7 @@ describe('ShareCard', () => {
 
     rerender(
       <MemoryRouter>
-        <ShareCard transfer={deletedTransfer} />
+        <ShareCard transfer={deletedTransfer} onExtendTransfer={extendTransferMock} />
       </MemoryRouter>,
     )
     await act(async () => {
@@ -341,13 +359,77 @@ describe('ShareCard', () => {
 
     rerender(
       <MemoryRouter>
-        <ShareCard transfer={uploadingTransfer} />
+        <ShareCard transfer={uploadingTransfer} onExtendTransfer={extendTransferMock} />
       </MemoryRouter>,
     )
     await act(async () => {
       await Promise.resolve()
     })
     expect(screen.getByText('The link will work once the upload finishes.')).toBeInTheDocument()
+  })
+
+  it('extends expiry from the share page and surfaces failures locally', async () => {
+    extendTransferMock.mockRejectedValueOnce(new Error('Extend failed'))
+
+    const transfer = createTransfer('active-8', 'Extend transfer', '2026-03-21T10:00:00.000Z')
+    const { rerender } = render(
+      <MemoryRouter>
+        <ShareCard transfer={transfer} onExtendTransfer={extendTransferMock} />
+      </MemoryRouter>,
+    )
+
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: /Set expiry to 1 week from now/i }))
+
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(extendTransferMock).toHaveBeenCalledWith('active-8', 7 * 24 * 60 * 60)
+    expect(screen.getByText('Extend failed')).toBeInTheDocument()
+
+    extendTransferMock.mockResolvedValueOnce(undefined)
+    rerender(
+      <MemoryRouter>
+        <ShareCard transfer={transfer} onExtendTransfer={extendTransferMock} />
+      </MemoryRouter>,
+    )
+
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: /Set expiry to 1 week from now/i }))
+
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(screen.queryByText('Extend failed')).not.toBeInTheDocument()
+  })
+
+  it('hides the extend action when local management is unavailable', async () => {
+    render(
+      <MemoryRouter>
+        <ShareCard
+          transfer={createTransfer('active-9', 'No manage token', '2026-03-21T10:00:00.000Z', {
+            manageToken: '',
+          })}
+          onExtendTransfer={extendTransferMock}
+        />
+      </MemoryRouter>,
+    )
+
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(
+      screen.queryByRole('button', { name: /Set expiry to 1 week from now/i }),
+    ).not.toBeInTheDocument()
   })
 
   it('keeps the QR placeholder when QR generation fails', async () => {
@@ -357,6 +439,7 @@ describe('ShareCard', () => {
       <MemoryRouter>
         <ShareCard
           transfer={createTransfer('active-5', 'Broken QR transfer', '2026-03-21T10:00:00.000Z')}
+          onExtendTransfer={extendTransferMock}
         />
       </MemoryRouter>,
     )

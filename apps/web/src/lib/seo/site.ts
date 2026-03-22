@@ -15,15 +15,15 @@ export const DEFAULT_SEO_DESCRIPTION = PROJECT_ONE_LINER
 export const HISTORY_PAGE_TITLE = 'Manage Transfers on This Device | Xdrop'
 export const HISTORY_PAGE_DESCRIPTION =
   'Manage encrypted transfers stored in this browser on this device. There is no account or cross-device history.'
-export const SHARE_PAGE_TITLE = 'Share the Full Link | Xdrop'
+export const SHARE_PAGE_TITLE = 'Share This Transfer | Xdrop'
 export const SHARE_PAGE_DESCRIPTION =
-  'Review upload status and copy the full share link for a transfer staged in this browser on this device.'
+  'Review upload status and share a transfer staged in this browser on this device without exposing its address on the page.'
 export const RECEIVE_PAGE_TITLE = 'Download and Decrypt in the Browser | Xdrop'
 export const RECEIVE_PAGE_DESCRIPTION =
-  'Download files from this transfer and decrypt them in the browser. The decryption key stays in the share link fragment.'
+  'Download files from this transfer and decrypt them in the browser. The decryption key stays in the browser and never reaches the server.'
 export const NOT_FOUND_PAGE_TITLE = 'Page Not Found | Xdrop'
 export const NOT_FOUND_PAGE_DESCRIPTION =
-  'The address does not map to a page in Xdrop. If this came from a shared transfer, ask for the full URL, including the #k=... decryption fragment.'
+  'The address does not map to a page in Xdrop. If this came from a shared transfer, ask the sender to resend the complete share details.'
 export const DEFAULT_OG_IMAGE_PATH = '/brand-lockup-horizontal.png'
 export const DEFAULT_OG_IMAGE_ALT = 'Xdrop horizontal brand lockup'
 export const DEFAULT_LOGO_PATH = '/brand-symbol-512.png'

@@ -8,7 +8,7 @@ import { usePageMetadata } from '@/lib/seo/usePageMetadata'
 /** SharePage shows sender-side progress and sharing controls for one local transfer. */
 export function SharePage() {
   const { transferId } = useParams()
-  const { transfers } = useTransfers()
+  const { transfers, extendTransfer } = useTransfers()
   const transfer = transfers.find((item) => item.id === transferId)
 
   usePageMetadata({
@@ -18,5 +18,5 @@ export function SharePage() {
     exposeUrl: false,
   })
 
-  return <ShareCard transfer={transfer} />
+  return <ShareCard transfer={transfer} onExtendTransfer={extendTransfer} />
 }

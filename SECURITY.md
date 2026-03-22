@@ -1,19 +1,10 @@
 # Security Policy
 
-## Supported versions
-
-Xdrop is pre-`1.0`, so security fixes are only guaranteed on the latest development line.
-
-| Version or branch                         | Supported |
-| ----------------------------------------- | --------- |
-| `main`                                    | Yes       |
-| older commits, branches, and ad-hoc forks | No        |
-
 ## Reporting a vulnerability
 
 Please do not report security issues in public GitHub issues, discussions, or pull requests.
 
-Instead, email [hi@xi-xu.me](mailto:hi@xi-xu.me) with the subject line `Xdrop security report`.
+Instead, email [i@xi-xu.me](mailto:i@xi-xu.me) with the subject line `Xdrop security report`.
 
 Include as much of the following as you can:
 

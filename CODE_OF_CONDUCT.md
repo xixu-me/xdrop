@@ -51,7 +51,7 @@ an appointed representative at an online or offline event.
 ## Enforcement
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to the project
-maintainer at [hi@xi-xu.me](mailto:hi@xi-xu.me). All complaints will be reviewed and investigated
+maintainer at [i@xi-xu.me](mailto:i@xi-xu.me). All complaints will be reviewed and investigated
 promptly and fairly.
 
 All community leaders are obligated to respect the privacy and security of the reporter of any
