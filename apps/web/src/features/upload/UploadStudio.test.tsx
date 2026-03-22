@@ -160,16 +160,20 @@ describe('UploadStudio', () => {
     draftState.sources = []
   })
 
-  it('shows browser-first positioning with agent workflow support copy', async () => {
+  it('shows messaging-aligned positioning for humans and agents', async () => {
     renderStudio()
 
-    expect(await screen.findByText('Encrypted file transfer.')).toBeInTheDocument()
+    expect(await screen.findByText('End-to-end encrypted file transfer.')).toBeInTheDocument()
     expect(
       screen.getByText(
-        /agent-driven terminal workflows, keeping plaintext file names, contents, and keys off the server\./,
+        /end-to-end encrypted file transfer app for humans and agents, keeping plaintext file names, contents, and keys off the server\./,
       ),
     ).toBeInTheDocument()
-    expect(screen.getByText(/Use Xdrop in the browser for normal sharing, or/i)).toBeInTheDocument()
+    expect(
+      screen.getByText(
+        /Humans can use Xdrop in the browser for direct sharing, and agents can use Xdrop/i,
+      ),
+    ).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'through an agent' })).toHaveAttribute(
       'href',
       'https://github.com/xixu-me/xdrop?tab=readme-ov-file#use-via-agents',

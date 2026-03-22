@@ -26,8 +26,8 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: './src/test/setup.ts',
     globals: true,
-    // Coverage runs can stall with forked workers on Windows, so prefer threads there.
-    pool: process.platform === 'win32' ? 'threads' : 'forks',
+    // Threads worker startup is flaky on Windows in Vitest 4, and forks also match CI.
+    pool: 'forks',
     coverage: {
       provider: 'v8',
       reporter: ['text', 'lcov'],

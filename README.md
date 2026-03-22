@@ -37,20 +37,23 @@
   English | <a href="./README.zh.md">汉语</a>
 </p>
 
-Xdrop is an open source encrypted file transfer app for browsers and agent-driven terminal
-workflows, keeping plaintext file names, contents, and keys off the server.
+Xdrop is an open source end-to-end encrypted file transfer app for humans and agents, keeping
+plaintext file names, contents, and keys off the server.
 
 ## Highlights
 
-- End-to-end encryption in the browser before upload.
+- End-to-end encrypted file transfer for direct browser sharing and agent-driven handoffs.
 - Single-file and folder transfers, including local ZIP downloads for received folders.
-- Resumable uploads with browser-local state for interrupted transfers.
+- Resumable uploads with local staged state for interrupted web transfers.
 - Expiring links, sender-side management, and optional privacy mode after upload.
 - S3-compatible object storage support with PostgreSQL and Redis on the backend.
 
 ## Use Via Agents
 
-You can use Xdrop through an agent by installing the bundled skill:
+Agents can use Xdrop to upload files, return end-to-end encrypted share links, and use Xdrop
+links for local decryption.
+
+Install the bundled skill:
 
 ```bash
 bunx skills add https://github.com/xixu-me/xdrop/tree/main/skills/xdrop
@@ -60,16 +63,7 @@ After that, the agent can use Xdrop from the terminal to:
 
 - Upload local files or directories and return an encrypted share link.
 - Download a full Xdrop share link, including `#k=...`, and decrypt it locally.
-- Automate repeatable handoff flows without switching to the browser UI.
-
-Useful cases:
-
-- On a cloud server, ask the agent to upload build artifacts, logs, or backups to your Xdrop
-  instance and send back a temporary link.
-- In a remote dev container or CI-like environment, ask the agent to package a directory and move
-  it through Xdrop instead of setting up ad hoc SCP or public object storage access.
-- On your local machine, hand the agent a full Xdrop link and ask it to download the files into a
-  specific directory.
+- Automate repeatable handoff flows without relying on the browser UI.
 
 Example prompts:
 
@@ -78,6 +72,9 @@ Example prompts:
 - `Download this Xdrop link into ~/downloads and keep the original folder structure.`
 
 ## How It Works
+
+For browser-based sharing, the core lifecycle works like this. Agents use the same encrypted
+transfer format and full share links for terminal uploads and local decryption.
 
 1. A sender creates a transfer in the browser. Xdrop generates a random transfer root key and a
    separate link key, optionally strips removable image metadata, and prepares resumable local
@@ -101,17 +98,17 @@ sizes, and rate-limit identifiers.
 
 Key technical details:
 
-- **Crypto model:** The browser generates 32-byte random secrets for the transfer root key and the
-  share-link key. HKDF-SHA-256 derives separate AES-256-GCM keys for the manifest and for each
-  file, and chunk encryption binds `transferId`, `fileId`, `chunkIndex`, size, and protocol
-  version as authenticated data.
+- **Crypto model:** The client generates 32-byte random secrets for the transfer
+  root key and the share-link key. HKDF-SHA-256 derives separate AES-256-GCM keys for the
+  manifest and for each file, and chunk encryption binds `transferId`, `fileId`, `chunkIndex`,
+  size, and protocol version as authenticated data.
 - **Chunked uploads:** The server advertises chunk size, file-count, and transfer-size limits to
-  the browser. This repo defaults to 8 MiB chunks, up to 100 files, and a 256 MiB encrypted
-  transfer size cap.
+  the upload client. This repo defaults to 8 MiB chunks, up to 100 files, and a 256 MiB
+  encrypted transfer size cap.
 - **Resume behavior:** Xdrop persists source files locally in OPFS when available and falls back
   to IndexedDB-backed blobs when the staged data is still within the fallback storage limit.
-  Resume requests ask the API which chunks already exist so the browser only uploads missing work
-  after a refresh or reopen.
+  Resume requests ask the API which chunks already exist so the active client only uploads missing
+  work after a refresh or reopen.
 - **Sender controls:** The manage token is returned once on creation and stored as a SHA-256 hash
   on the server. Privacy mode can scrub sender-side local controls after upload.
 - **Backend responsibilities:** The API never decrypts payloads. It validates transfer state,
@@ -120,9 +117,12 @@ Key technical details:
 
 ## System Architecture
 
+The default deployment below shows the human browser flow. Agents interact with the same API and
+share-link format for terminal uploads and local decryption.
+
 ```mermaid
 flowchart LR
-  subgraph Sender["Sender browser"]
+  subgraph Sender["Human sender browser"]
     Select["Choose files or a folder"]
     Worker["Crypto worker<br/>AES-256-GCM + HKDF-SHA-256"]
     Local["OPFS / IndexedDB<br/>resume state and local controls"]
@@ -142,7 +142,7 @@ flowchart LR
   Postgres["PostgreSQL<br/>transfers, files, chunks, hashed manage tokens"]
   Redis["Redis<br/>rate limiting"]
   Storage["S3-compatible storage<br/>encrypted manifest and chunk objects"]
-  Receiver["Receiver browser<br/>opens /t/:id#k=..."]
+  Receiver["Human receiver browser<br/>opens /t/:id#k=..."]
 
   Browser -->|create/register/finalize| nginx
   Browser -->|presigned PUT uploads| nginx
