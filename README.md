@@ -48,6 +48,28 @@ plaintext file names, contents, and keys off the server.
 - Expiring links, sender-side management, and optional privacy mode after upload.
 - S3-compatible object storage support with PostgreSQL and Redis on the backend.
 
+## Screenshots
+
+<p align="center">
+  <img
+    src="./docs/images/agent-upload-download-workflow.png"
+    alt="Uploading and downloading through Xdrop from an agent workspace"
+    width="900"
+  />
+</p>
+
+Agents can directly encrypt and upload local files or folders to generate a share link, or download and decrypt files locally using an existing link.
+
+<p align="center">
+  <img
+    src="./docs/images/browser-download-and-decrypt.png"
+    alt="Browser download and decryption page for an Xdrop transfer"
+    width="900"
+  />
+</p>
+
+Humans can also open the share link directly in a browser to decrypt and download the files locally.
+
 ## Use Via Agents
 
 Agents can use Xdrop to upload files, return end-to-end encrypted share links, and use Xdrop
