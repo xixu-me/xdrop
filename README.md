@@ -56,7 +56,7 @@ links for local decryption.
 Install the bundled skill:
 
 ```bash
-bunx skills add https://github.com/xixu-me/xdrop/tree/main/skills/xdrop
+bunx skills add xixu-me/xdrop
 ```
 
 After that, the agent can use Xdrop from the terminal to:
