@@ -297,7 +297,7 @@ Then reload Caddy:
 systemctl reload caddy
 ```
 
-After the stack starts, open <https://xdrop.example.com>.
+After the stack starts, open `https://xdrop.example.com`.
 
 ### Production Notes
 
