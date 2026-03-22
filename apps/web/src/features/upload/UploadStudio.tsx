@@ -244,10 +244,10 @@ export function UploadStudio() {
         <div className="upload-hero-shell">
           <div className="page-hero-copy upload-hero-copy">
             <p className="eyebrow">End-to-end encryption</p>
-            <h1 className="page-hero-title">Encrypted file transfer.</h1>
+            <h1 className="page-hero-title">End-to-end encrypted file transfer.</h1>
             <p className="lead">{PROJECT_ONE_LINER}</p>
             <p className="muted">
-              Use Xdrop in the browser for normal sharing, or{' '}
+              Humans can use Xdrop in the browser for direct sharing, and agents can use Xdrop{' '}
               <a
                 className="inline-link"
                 href="https://github.com/xixu-me/xdrop?tab=readme-ov-file#use-via-agents"
@@ -256,8 +256,7 @@ export function UploadStudio() {
               >
                 through an agent
               </a>{' '}
-              when you need to move files out of a cloud server, remote container, or automated
-              terminal workflow.
+              in cloud servers, remote containers, and automated terminal workflows.
             </p>
           </div>
         </div>

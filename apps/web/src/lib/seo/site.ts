@@ -4,13 +4,12 @@
 
 export const SITE_NAME = 'Xdrop'
 export const PROJECT_ONE_LINER =
-  'Xdrop is an open source encrypted file transfer app for browsers and agent-driven terminal workflows, keeping plaintext file names, contents, and keys off the server.'
-export const SHORT_POSITIONING_SUMMARY =
-  'Browser-first encrypted file transfer, with agent-ready terminal workflows.'
+  'Xdrop is an open source end-to-end encrypted file transfer app for humans and agents, keeping plaintext file names, contents, and keys off the server.'
+export const SHORT_POSITIONING_SUMMARY = 'End-to-end encrypted file transfer for humans and agents.'
 export const TERMINAL_SUPPORT_BLURB =
-  'Use Xdrop in the browser for normal sharing, or through an agent when you need to move files out of a cloud server, remote container, or automated terminal workflow.'
+  'Agents can use Xdrop to upload files, return end-to-end encrypted share links, and use Xdrop links for local decryption.'
 export const DEFAULT_SEO_TITLE =
-  'Open Source Encrypted File Transfer for Browsers and Agents | Xdrop'
+  'Open Source End-to-End Encrypted File Transfer for Humans and Agents | Xdrop'
 export const DEFAULT_SEO_DESCRIPTION = PROJECT_ONE_LINER
 export const HISTORY_PAGE_TITLE = 'Manage Transfers on This Device | Xdrop'
 export const HISTORY_PAGE_DESCRIPTION =
@@ -25,7 +24,8 @@ export const NOT_FOUND_PAGE_TITLE = 'Page Not Found | Xdrop'
 export const NOT_FOUND_PAGE_DESCRIPTION =
   'The address does not map to a page in Xdrop. If this came from a shared transfer, ask the sender to resend the complete share details.'
 export const DEFAULT_OG_IMAGE_PATH = '/brand-lockup-horizontal.png'
-export const DEFAULT_OG_IMAGE_ALT = 'Xdrop horizontal brand lockup'
+export const DEFAULT_OG_IMAGE_ALT =
+  'Open source end-to-end encrypted file transfer for humans and agents. Plaintext file names, contents, and keys stay off the server.'
 export const DEFAULT_LOGO_PATH = '/brand-symbol-512.png'
 export const REPOSITORY_URL = 'https://github.com/xixu-me/xdrop'
 export const AUTHOR_NAME = 'Xi Xu'

@@ -10,7 +10,8 @@ const siteUrl = process.env.VITE_SITE_URL?.trim().replace(/\/+$/u, '') || ''
 const SITE_NAME = 'Xdrop'
 const DEFAULT_OG_IMAGE_PATH = '/brand-lockup-horizontal.png'
 const DEFAULT_LOGO_PATH = '/brand-symbol-512.png'
-const DEFAULT_OG_IMAGE_ALT = 'Xdrop horizontal brand lockup'
+const DEFAULT_OG_IMAGE_ALT =
+  'Open source end-to-end encrypted file transfer for humans and agents. Plaintext file names, contents, and keys stay off the server.'
 const DEFAULT_OG_TYPE = 'website'
 const REPOSITORY_URL = 'https://github.com/xixu-me/xdrop'
 const DEFAULT_ROBOTS =
@@ -18,9 +19,9 @@ const DEFAULT_ROBOTS =
 const PRIVATE_ROBOTS = 'noindex, nofollow, noarchive, nosnippet'
 const STRUCTURED_DATA_ID = 'xdrop-structured-data-static'
 
-const HOME_TITLE = 'Open Source Encrypted File Transfer for Browsers and Agents | Xdrop'
+const HOME_TITLE = 'Open Source End-to-End Encrypted File Transfer for Humans and Agents | Xdrop'
 const HOME_DESCRIPTION =
-  'Xdrop is an open source encrypted file transfer app for browsers and agent-driven terminal workflows, keeping plaintext file names, contents, and keys off the server.'
+  'Xdrop is an open source end-to-end encrypted file transfer app for humans and agents, keeping plaintext file names, contents, and keys off the server.'
 const HISTORY_PAGE_TITLE = 'Manage Transfers on This Device | Xdrop'
 const HISTORY_PAGE_DESCRIPTION =
   'Manage encrypted transfers stored in this browser on this device. There is no account or cross-device history.'

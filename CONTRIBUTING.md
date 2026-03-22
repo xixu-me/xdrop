@@ -8,7 +8,8 @@ unlikely to land.
 
 ## Project focus
 
-Xdrop is focused on private file transfer with browser-side encryption.
+Xdrop is focused on open source end-to-end encrypted file transfer for humans and agents, keeping
+plaintext file names, contents, and keys off the server.
 
 Changes are most likely to be accepted when they improve one or more of these areas:
 

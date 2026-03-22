@@ -27,7 +27,7 @@ describe('HomePage', () => {
 
     expect(usePageMetadataMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        title: 'Open Source Encrypted File Transfer for Browsers and Agents | Xdrop',
+        title: 'Open Source End-to-End Encrypted File Transfer for Humans and Agents | Xdrop',
         structuredData: expect.arrayContaining([
           expect.objectContaining({
             '@type': 'Organization',

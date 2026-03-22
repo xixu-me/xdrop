@@ -1,4 +1,4 @@
-const CACHE_NAME = 'xdrop-static-v4'
+const CACHE_NAME = 'xdrop-static-v5'
 const STATIC_ASSETS = [
   '/manifest.webmanifest',
   '/brand-symbol.svg',

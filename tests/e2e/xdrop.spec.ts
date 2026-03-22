@@ -119,7 +119,8 @@ test('preserves folder paths, downloads a zip, and manages transfers', async ({
 
   const descriptorBefore = await getPublicDescriptor(request, transferId)
   const expiryBefore = Date.parse(descriptorBefore.expiresAt)
-  await card.getByRole('button', { name: 'Set expiry to 1 week from now' }).click()
+  await card.getByRole('link', { name: 'Open share page' }).click()
+  await page.getByRole('button', { name: 'Set expiry to 1 week from now' }).click()
   await expect
     .poll(async () => Date.parse((await getPublicDescriptor(request, transferId)).expiresAt))
     .toBeGreaterThan(expiryBefore)
@@ -127,6 +128,7 @@ test('preserves folder paths, downloads a zip, and manages transfers', async ({
   await receiver.reload({ waitUntil: 'networkidle' })
   await expect(receiver.getByText(transferName).first()).toBeVisible()
 
+  await page.goto(`${BASE_URL}/transfers`, { waitUntil: 'networkidle' })
   await card.getByRole('button', { name: 'Delete' }).click()
   await card.getByRole('button', { name: 'Confirm delete' }).click()
   await expect(page.locator('section').filter({ hasText: transferName })).toHaveCount(0)

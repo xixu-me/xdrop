@@ -21,6 +21,7 @@ describe('Shell', () => {
     expect(screen.getByRole('link', { name: 'Xdrop' })).toHaveAttribute('href', '/')
     expect(screen.getByRole('link', { name: 'Send' })).toHaveAttribute('href', '/')
     expect(screen.getByRole('link', { name: 'Transfers' })).toHaveAttribute('href', '/transfers')
+    expect(screen.getByText('End-to-end encrypted file transfer')).toBeInTheDocument()
     expect(screen.getByText('Transfers content')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'View the license' }).closest('p')).toHaveTextContent(
       `Developed by ${AUTHOR_NAME} and released under the GNU Affero General Public License v3.0 only.`,
