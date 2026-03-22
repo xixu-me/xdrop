@@ -4,6 +4,7 @@ on:
   pull_request:
     paths-ignore:
       - '**/*.md'
+      - 'docs/**'
       - '.github/ISSUE_TEMPLATE/**'
       - '.github/pull_request_template.md'
       - 'AGENTS.md'
@@ -17,6 +18,7 @@ on:
       - main
     paths-ignore:
       - '**/*.md'
+      - 'docs/**'
       - '.github/ISSUE_TEMPLATE/**'
       - '.github/pull_request_template.md'
       - 'AGENTS.md'
