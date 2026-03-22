@@ -1,3 +1,4 @@
+import { MAX_EXPIRY_SECONDS, getExpiryOptionLabel } from '@xdrop/shared'
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import QRCode from 'qrcode'
@@ -14,17 +15,25 @@ import { isExpiredTransfer } from '@/lib/transfers/expiry'
 
 type Props = {
   transfer: LocalTransferRecord | undefined
+  onExtendTransfer?: (transferId: string, expiresInSeconds: number) => Promise<void>
 }
 
 /** ShareCard shows sender-side sharing controls and current upload state for one transfer. */
-export function ShareCard({ transfer }: Props) {
+export function ShareCard({ transfer, onExtendTransfer }: Props) {
   const [now, setNow] = useState(() => Date.now())
   const [qrState, setQrState] = useState<{ dataUrl?: string; shareUrl?: string }>({})
   const [copyState, setCopyState] = useState<'idle' | 'copied'>('idle')
+  const [isExtending, setIsExtending] = useState(false)
   const [actionError, setActionError] = useState<string>()
   const progress = transfer ? (transfer.uploadedBytes / Math.max(transfer.totalBytes, 1)) * 100 : 0
   const expired = transfer ? isExpiredTransfer(transfer, now) : false
   const canShareLink = Boolean(transfer?.shareUrl) && !expired && transfer?.status !== 'deleted'
+  const canExtendTransfer =
+    Boolean(transfer?.manageToken) &&
+    !expired &&
+    transfer?.status !== 'deleted' &&
+    transfer?.localManagementCleared !== true &&
+    onExtendTransfer !== undefined
   const qrShareUrl = canShareLink ? transfer?.shareUrl : undefined
   const qrDataUrl = qrShareUrl && qrState.shareUrl === qrShareUrl ? qrState.dataUrl : undefined
 
@@ -80,7 +89,7 @@ export function ShareCard({ transfer }: Props) {
       window.setTimeout(() => setCopyState('idle'), 1800)
     } catch {
       setCopyState('idle')
-      setActionError('Copy failed. Select the full link below to copy it manually.')
+      setActionError('Copy failed. Use your browser share tools or try again on this device.')
     }
   }
 
@@ -108,6 +117,24 @@ export function ShareCard({ transfer }: Props) {
     }
 
     await copyLink()
+  }
+
+  const extendExpiry = async () => {
+    if (!transfer || !canExtendTransfer || !onExtendTransfer) {
+      return
+    }
+
+    try {
+      setActionError(undefined)
+      setIsExtending(true)
+      await onExtendTransfer(transfer.id, MAX_EXPIRY_SECONDS)
+    } catch (error) {
+      setActionError(
+        error instanceof Error ? error.message : 'Could not update this transfer right now.',
+      )
+    } finally {
+      setIsExtending(false)
+    }
   }
 
   if (!transfer) {
@@ -173,7 +200,7 @@ export function ShareCard({ transfer }: Props) {
         <div className="page-hero-head">
           <div className="page-hero-copy">
             <p className="eyebrow">Share</p>
-            <h2>Share the full link.</h2>
+            <h2>Share this transfer.</h2>
             <p className="page-summary-name">{transfer.displayName}</p>
             <p className="muted page-intro">
               The server stores ciphertext and operational metadata, not plaintext file names, file
@@ -208,23 +235,17 @@ export function ShareCard({ transfer }: Props) {
           <Button onClick={() => void shareLink()} tone="ghost" disabled={!canShareLink}>
             Share link
           </Button>
+          {canExtendTransfer ? (
+            <Button tone="ghost" onClick={() => void extendExpiry()} disabled={isExtending}>
+              {isExtending
+                ? 'Updating expiry…'
+                : `Set expiry to ${getExpiryOptionLabel(MAX_EXPIRY_SECONDS)} from now`}
+            </Button>
+          ) : null}
           <Link className="button button--ghost" to="/transfers">
             Manage transfers
           </Link>
         </div>
-        {transfer.shareUrl ? (
-          <label className="field">
-            <span>Full link</span>
-            <input
-              autoComplete="off"
-              name="shareUrl"
-              readOnly
-              spellCheck={false}
-              value={transfer.shareUrl}
-              onFocus={(event) => event.currentTarget.select()}
-            />
-          </label>
-        ) : null}
         {actionError ? (
           <p aria-live="polite" className="warning">
             {actionError}
@@ -232,13 +253,13 @@ export function ShareCard({ transfer }: Props) {
         ) : null}
         {transfer.localManagementCleared ? (
           <p className="warning">
-            Privacy mode removed local transfer controls after upload. Keep the share link safe.
-            Extend and delete are no longer available here.
+            Privacy mode removed local transfer controls after upload. Keep your saved share access
+            safe. Extend and delete are no longer available here.
           </p>
         ) : null}
         <p className="warning">
-          Keep the full link, including the <code>#k=</code> part. Without it, the files cannot be
-          decrypted.
+          Keep the original share details intact. If the decryption key is missing, the files cannot
+          be opened.
         </p>
       </Card>
 

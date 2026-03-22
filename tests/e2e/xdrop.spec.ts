@@ -212,7 +212,7 @@ async function createSingleFileTransfer(
     })
   await page.getByRole('button', { name: 'Start transfer' }).click()
   await expect(page).toHaveURL(/\/share\//, { timeout: 60_000 })
-  await expect(page.getByRole('heading', { name: 'Share the full link.' })).toBeVisible({
+  await expect(page.getByRole('heading', { name: 'Share this transfer.' })).toBeVisible({
     timeout: 60_000,
   })
   await expect(page.locator('.status-badge').filter({ hasText: 'Ready' })).toBeVisible({
@@ -254,7 +254,7 @@ async function createFolderTransfer(
   }, options.files)
   await page.getByRole('button', { name: 'Start transfer' }).click()
   await expect(page).toHaveURL(/\/share\//, { timeout: 60_000 })
-  await expect(page.getByRole('heading', { name: 'Share the full link.' })).toBeVisible({
+  await expect(page.getByRole('heading', { name: 'Share this transfer.' })).toBeVisible({
     timeout: 60_000,
   })
   await expect(page.locator('.status-badge').filter({ hasText: 'Ready' })).toBeVisible({

@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from 'react'
-import { MAX_EXPIRY_SECONDS, getExpiryOptionLabel } from '@xdrop/shared'
 import { Link } from 'react-router-dom'
 
 import { Button } from '@/components/ui/Button'
@@ -14,8 +13,7 @@ import { isExpiredTransfer } from '@/lib/transfers/expiry'
 
 /** HistoryBoard is the sender-side dashboard for transfer status, copy, extend, and delete actions. */
 export function HistoryBoard() {
-  const { transfers, deleteTransfer, extendTransfer } = useTransfers()
-  const [copiedTransferId, setCopiedTransferId] = useState<string>()
+  const { transfers, deleteTransfer } = useTransfers()
   const [expandedExpired, setExpandedExpired] = useState(false)
   const [now, setNow] = useState(() => Date.now())
   const [actionErrors, setActionErrors] = useState<Record<string, string>>({})
@@ -61,33 +59,6 @@ export function HistoryBoard() {
       delete next[transferId]
       return next
     })
-  }
-
-  /** copyLink keeps link-copy feedback local to the transfer the user interacted with. */
-  const copyLink = async (transferId: string, shareUrl: string | undefined) => {
-    if (!shareUrl) {
-      return
-    }
-    clearActionError(transferId)
-    try {
-      await navigator.clipboard.writeText(shareUrl)
-      setCopiedTransferId(transferId)
-      window.setTimeout(() => setCopiedTransferId(undefined), 1800)
-    } catch {
-      setActionErrors((current) => ({
-        ...current,
-        [transferId]: 'Copy failed. Open the share page to copy the full link manually.',
-      }))
-    }
-  }
-
-  const handleExtend = async (transferId: string) => {
-    clearActionError(transferId)
-    try {
-      await extendTransfer(transferId, MAX_EXPIRY_SECONDS)
-    } catch (error) {
-      setActionError(transferId, error)
-    }
   }
 
   const handleDelete = async (transferId: string) => {
@@ -187,20 +158,10 @@ export function HistoryBoard() {
             ) : null}
           </div>
           <div className="history-actions">
-            {transfer.shareUrl && !expired ? (
-              <Button tone="ghost" onClick={() => void copyLink(transfer.id, transfer.shareUrl)}>
-                {copiedTransferId === transfer.id ? 'Copied' : 'Copy link'}
-              </Button>
-            ) : null}
             {!expired ? (
               <Link className="button button--ghost" to={`/share/${transfer.id}`}>
                 Open share page
               </Link>
-            ) : null}
-            {canManageTransfer && !expired ? (
-              <Button tone="ghost" onClick={() => void handleExtend(transfer.id)}>
-                {`Set expiry to ${getExpiryOptionLabel(MAX_EXPIRY_SECONDS)} from now`}
-              </Button>
             ) : null}
             {pendingDeleteTransferId === transfer.id ? (
               <>
@@ -232,11 +193,9 @@ export function HistoryBoard() {
           </div>
         </div>
 
-        {pendingDeleteTransferId === transfer.id ? (
+        {pendingDeleteTransferId === transfer.id && !canManageTransfer ? (
           <p aria-live="polite" className="warning">
-            {canManageTransfer
-              ? 'Confirm delete to remove this transfer from this device.'
-              : 'Confirm forget to remove this local record from this device.'}
+            Confirm forget to remove this local record from this device.
           </p>
         ) : null}
         {transfer.localManagementCleared ? (

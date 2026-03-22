@@ -20,8 +20,6 @@ Environment requirements:
 
 ## Upload
 
-Run from the skill root:
-
 ```bash
 bun scripts/upload.mjs --server <xdrop-site-url> <file-or-directory> [...]
 ```
@@ -48,8 +46,6 @@ If the user wants verification, upload a small temporary file and then confirm t
 ## Download
 
 Require the full share link, including `#k=...`. Without the fragment key, the transfer cannot be decrypted.
-
-Run from the skill root:
 
 ```bash
 bun scripts/download.mjs "<share-url>"

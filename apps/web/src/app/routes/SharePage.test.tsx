@@ -4,12 +4,14 @@ import { describe, expect, it, vi } from 'vitest'
 
 const { usePageMetadataMock, useTransfersMock } = vi.hoisted(() => ({
   usePageMetadataMock: vi.fn(),
+  extendTransferMock: vi.fn(async () => {}),
   useTransfersMock: vi.fn(() => ({
     transfers: [
       {
         id: 't1',
       },
     ],
+    extendTransfer: vi.fn(async () => {}),
   })),
 }))
 
@@ -46,9 +48,16 @@ describe('SharePage', () => {
     expect(usePageMetadataMock).toHaveBeenCalledWith(
       expect.objectContaining({
         exposeUrl: false,
-        title: 'Share the Full Link | Xdrop',
+        title: 'Share This Transfer | Xdrop',
       }),
     )
     expect(screen.getByText('Share t1')).toBeInTheDocument()
+    expect(shareCardMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        transfer: { id: 't1' },
+        onExtendTransfer: expect.any(Function),
+      }),
+      undefined,
+    )
   })
 })
