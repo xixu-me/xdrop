@@ -1,4 +1,4 @@
-FROM oven/bun:alpine AS web-build
+FROM --platform=$BUILDPLATFORM oven/bun:alpine AS web-build
 
 WORKDIR /workspace
 
@@ -14,25 +14,26 @@ COPY apps/web ./apps/web
 RUN bun install --frozen-lockfile
 RUN bun run build:web
 
-FROM golang:1.26-alpine AS api-build
+FROM --platform=$BUILDPLATFORM golang:1.26-alpine AS api-build
 
 WORKDIR /src/apps/api
+
+ARG TARGETOS
+ARG TARGETARCH
 
 COPY apps/api/go.mod apps/api/go.sum ./
 RUN go mod download
 
 COPY apps/api ./
 
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /out/xdrop-api ./cmd/api
+RUN CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH:-amd64} go build -o /out/xdrop-api ./cmd/api
 
 FROM nginx:1.29-alpine
 
 COPY infra/xdrop/nginx.conf.template /etc/nginx/templates/default.conf.template
-COPY infra/xdrop/entrypoint.sh /usr/local/bin/xdrop-entrypoint
+COPY --chmod=755 infra/xdrop/entrypoint.sh /usr/local/bin/xdrop-entrypoint
 COPY --from=web-build /workspace/apps/web/dist /usr/share/nginx/html
 COPY --from=api-build /out/xdrop-api /usr/local/bin/xdrop-api
-
-RUN chmod +x /usr/local/bin/xdrop-entrypoint
 
 EXPOSE 80
 
