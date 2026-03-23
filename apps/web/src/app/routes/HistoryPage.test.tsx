@@ -27,8 +27,10 @@ describe('HistoryPage', () => {
 
     expect(usePageMetadataMock).toHaveBeenCalledWith(
       expect.objectContaining({
+        description:
+          'Manage Xdrop end-to-end encrypted file transfers stored in this browser on this device. Plaintext file names, contents, and keys stay off the server.',
         exposeUrl: false,
-        title: 'Manage Transfers on This Device | Xdrop',
+        title: 'Manage End-to-End Encrypted Transfers on This Device | Xdrop',
       }),
     )
     expect(screen.getByText('History board')).toBeInTheDocument()

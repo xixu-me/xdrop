@@ -1,6 +1,18 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { getConfiguredSiteUrl, getHomeStructuredData, getSiteOrigin, toAbsoluteUrl } from './site'
+import {
+  HISTORY_PAGE_DESCRIPTION,
+  HISTORY_PAGE_TITLE,
+  NOT_FOUND_PAGE_DESCRIPTION,
+  RECEIVE_PAGE_DESCRIPTION,
+  RECEIVE_PAGE_TITLE,
+  SHARE_PAGE_DESCRIPTION,
+  SHARE_PAGE_TITLE,
+  getConfiguredSiteUrl,
+  getHomeStructuredData,
+  getSiteOrigin,
+  toAbsoluteUrl,
+} from './site'
 
 describe('site helpers', () => {
   afterEach(() => {
@@ -49,5 +61,23 @@ describe('site helpers', () => {
       configurable: true,
       value: originalWindow,
     })
+  })
+
+  it('keeps page-level seo copy aligned with the messaging guide', () => {
+    expect(HISTORY_PAGE_TITLE).toBe('Manage End-to-End Encrypted Transfers on This Device | Xdrop')
+    expect(HISTORY_PAGE_DESCRIPTION).toBe(
+      'Manage Xdrop end-to-end encrypted file transfers stored in this browser on this device. Plaintext file names, contents, and keys stay off the server.',
+    )
+    expect(SHARE_PAGE_TITLE).toBe('Share an End-to-End Encrypted Transfer | Xdrop')
+    expect(SHARE_PAGE_DESCRIPTION).toBe(
+      'Share an Xdrop end-to-end encrypted file transfer from this browser on this device while keeping plaintext file names, contents, and keys off the server.',
+    )
+    expect(RECEIVE_PAGE_TITLE).toBe('Receive an End-to-End Encrypted Transfer | Xdrop')
+    expect(RECEIVE_PAGE_DESCRIPTION).toBe(
+      'Receive an Xdrop end-to-end encrypted file transfer and decrypt it locally in the browser, keeping plaintext file names, contents, and keys off the server.',
+    )
+    expect(NOT_FOUND_PAGE_DESCRIPTION).toBe(
+      'This page was not found in Xdrop. If this came from an end-to-end encrypted transfer link, ask the sender to resend the complete share details.',
+    )
   })
 })

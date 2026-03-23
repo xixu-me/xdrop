@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"encoding/base64"
+	"strings"
 	"testing"
 	"time"
 
@@ -272,6 +273,7 @@ func TestGetPublicTransferReturnsNotFoundAndExpiredStatuses(t *testing.T) {
 
 	_, err := svc.GetPublicTransfer(context.Background(), "198.51.100.20", "missing-transfer")
 	requireHTTPError(t, err, 404, "not_found")
+	requireHTTPErrorMessage(t, err, "Transfer not found")
 
 	create := createTransferForTest(t, svc)
 	transfer, err := repository.GetTransfer(context.Background(), create.TransferID)
@@ -287,6 +289,59 @@ func TestGetPublicTransferReturnsNotFoundAndExpiredStatuses(t *testing.T) {
 	require.Equal(t, "expired", response.Status)
 	require.Empty(t, response.ManifestURL)
 	require.Empty(t, response.WrappedRootKey)
+}
+
+func TestHTTPErrorMessagesAreSentenceCased(t *testing.T) {
+	t.Parallel()
+
+	repository := newMemoryRepository()
+	svc := newTestService(repository)
+	create := createTransferForTest(t, svc)
+
+	testCases := []struct {
+		name    string
+		err     error
+		message string
+	}{
+		{
+			name: "missing manage token",
+			err: svc.RegisterFiles(context.Background(), create.TransferID, "", []RegisterFileRequest{{
+				FileID:          "file-a",
+				TotalChunks:     1,
+				CiphertextBytes: 1,
+				ChunkSize:       1,
+			}}),
+			message: "Manage token is required",
+		},
+		{
+			name:    "empty files",
+			err:     svc.RegisterFiles(context.Background(), create.TransferID, create.ManageToken, nil),
+			message: "At least one file must be registered",
+		},
+		{
+			name: "transfer unavailable",
+			err: func() error {
+				_, err := svc.CreateDownloadURLs(
+					context.Background(),
+					"198.51.100.20",
+					create.TransferID,
+					DownloadURLRequest{Chunks: []UploadChunkRequest{{FileID: "file-a", ChunkIndex: 0}}},
+				)
+				return err
+			}(),
+			message: "Transfer is not available for download",
+		},
+	}
+
+	for _, tc := range testCases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+
+			httpErr := requireHTTPErrorMessage(t, tc.err, tc.message)
+			require.Equal(t, strings.ToUpper(httpErr.Message[:1]), httpErr.Message[:1])
+		})
+	}
 }
 
 func TestCreateDownloadURLsValidatesAvailabilityAndChunkPresence(t *testing.T) {
@@ -405,4 +460,16 @@ func requireHTTPError(t *testing.T, err error, status int, code string) {
 	require.True(t, ok)
 	require.Equal(t, status, httpErr.Status)
 	require.Equal(t, code, httpErr.Code)
+}
+
+func requireHTTPErrorMessage(t *testing.T, err error, message string) *HTTPError {
+	t.Helper()
+
+	require.Error(t, err)
+
+	httpErr, ok := err.(*HTTPError)
+	require.True(t, ok)
+	require.Equal(t, message, httpErr.Message)
+
+	return httpErr
 }
