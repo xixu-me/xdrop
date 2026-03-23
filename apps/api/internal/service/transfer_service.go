@@ -230,10 +230,10 @@ func (s *Service) CreateTransfer(ctx context.Context, clientKey string, request 
 // RegisterFiles validates encrypted file metadata before upload URLs are issued.
 func (s *Service) RegisterFiles(ctx context.Context, transferID string, token string, files []RegisterFileRequest) error {
 	if len(files) == 0 {
-		return &HTTPError{Status: 400, Code: "empty_files", Message: "at least one file must be registered"}
+		return &HTTPError{Status: 400, Code: "empty_files", Message: "At least one file must be registered"}
 	}
 	if len(files) > s.cfg.MaxFileCount {
-		return &HTTPError{Status: 400, Code: "too_many_files", Message: "file count exceeds configured maximum"}
+		return &HTTPError{Status: 400, Code: "too_many_files", Message: "File count exceeds configured maximum"}
 	}
 
 	transfer, err := s.authorizeManage(ctx, transferID, token)
@@ -241,14 +241,14 @@ func (s *Service) RegisterFiles(ctx context.Context, transferID string, token st
 		return err
 	}
 	if isExpired(transfer) {
-		return &HTTPError{Status: 410, Code: "expired", Message: "transfer has expired"}
+		return &HTTPError{Status: 410, Code: "expired", Message: "Transfer has expired"}
 	}
 
 	totalBytes := int64(0)
 	modelFiles := make([]models.TransferFile, 0, len(files))
 	for _, file := range files {
 		if strings.TrimSpace(file.FileID) == "" || file.TotalChunks <= 0 || file.ChunkSize <= 0 || file.CiphertextBytes <= 0 {
-			return &HTTPError{Status: 400, Code: "invalid_file_registration", Message: "file registration contains invalid values"}
+			return &HTTPError{Status: 400, Code: "invalid_file_registration", Message: "File registration contains invalid values"}
 		}
 		totalBytes += file.CiphertextBytes
 		modelFiles = append(modelFiles, models.TransferFile{
@@ -263,7 +263,7 @@ func (s *Service) RegisterFiles(ctx context.Context, transferID string, token st
 	}
 
 	if totalBytes > s.cfg.MaxTransferBytes {
-		return &HTTPError{Status: 400, Code: "transfer_too_large", Message: "transfer exceeds configured size limit"}
+		return &HTTPError{Status: 400, Code: "transfer_too_large", Message: "Transfer exceeds configured size limit"}
 	}
 
 	if err := s.repo.RegisterFiles(ctx, transferID, modelFiles); err != nil {
@@ -280,7 +280,7 @@ func (s *Service) CreateUploadURLs(ctx context.Context, transferID string, token
 		return nil, err
 	}
 	if isExpired(transfer) {
-		return nil, &HTTPError{Status: 410, Code: "expired", Message: "transfer has expired"}
+		return nil, &HTTPError{Status: 410, Code: "expired", Message: "Transfer has expired"}
 	}
 
 	files, err := s.repo.ListFiles(ctx, transferID)
@@ -296,7 +296,7 @@ func (s *Service) CreateUploadURLs(ctx context.Context, transferID string, token
 	for _, chunk := range request.Chunks {
 		file, ok := fileIndex[chunk.FileID]
 		if !ok || chunk.ChunkIndex < 0 || chunk.ChunkIndex >= file.TotalChunks {
-			return nil, &HTTPError{Status: 400, Code: "invalid_chunk_request", Message: "upload chunk request is invalid"}
+			return nil, &HTTPError{Status: 400, Code: "invalid_chunk_request", Message: "Upload chunk request is invalid"}
 		}
 
 		objectKey := chunkObjectKey(transferID, chunk.FileID, chunk.ChunkIndex)
@@ -323,13 +323,13 @@ func (s *Service) CompleteChunks(ctx context.Context, transferID string, token s
 		return err
 	}
 	if isExpired(transfer) {
-		return &HTTPError{Status: 410, Code: "expired", Message: "transfer has expired"}
+		return &HTTPError{Status: 410, Code: "expired", Message: "Transfer has expired"}
 	}
 
 	modelChunks := make([]models.TransferChunk, 0, len(chunks))
 	for _, chunk := range chunks {
 		if strings.TrimSpace(chunk.FileID) == "" || chunk.ChunkIndex < 0 || chunk.CiphertextSize <= 0 || strings.TrimSpace(chunk.ChecksumSHA256) == "" {
-			return &HTTPError{Status: 400, Code: "invalid_chunk_completion", Message: "chunk completion payload is invalid"}
+			return &HTTPError{Status: 400, Code: "invalid_chunk_completion", Message: "Chunk completion payload is invalid"}
 		}
 		modelChunks = append(modelChunks, models.TransferChunk{
 			TransferID:     transferID,
@@ -355,12 +355,12 @@ func (s *Service) PutManifest(ctx context.Context, transferID string, token stri
 		return err
 	}
 	if isExpired(transfer) {
-		return &HTTPError{Status: 410, Code: "expired", Message: "transfer has expired"}
+		return &HTTPError{Status: 410, Code: "expired", Message: "Transfer has expired"}
 	}
 
 	payload, err := base64.StdEncoding.DecodeString(request.CiphertextBase64)
 	if err != nil || len(payload) == 0 {
-		return &HTTPError{Status: 400, Code: "invalid_manifest", Message: "manifest payload must be valid base64 ciphertext"}
+		return &HTTPError{Status: 400, Code: "invalid_manifest", Message: "Manifest payload must be valid base64 ciphertext"}
 	}
 
 	objectKey := manifestObjectKey(transferID)
@@ -381,10 +381,10 @@ func (s *Service) FinalizeTransfer(ctx context.Context, transferID string, token
 		return err
 	}
 	if isExpired(transfer) {
-		return &HTTPError{Status: 410, Code: "expired", Message: "transfer has expired"}
+		return &HTTPError{Status: 410, Code: "expired", Message: "Transfer has expired"}
 	}
 	if strings.TrimSpace(request.WrappedRootKey) == "" || request.TotalFiles <= 0 || request.TotalCiphertextBytes <= 0 {
-		return &HTTPError{Status: 400, Code: "invalid_finalize", Message: "finalize payload is invalid"}
+		return &HTTPError{Status: 400, Code: "invalid_finalize", Message: "Finalize payload is invalid"}
 	}
 
 	if err := s.repo.FinalizeTransfer(ctx, transferID, request.WrappedRootKey, request.TotalFiles, request.TotalCiphertextBytes); err != nil {
@@ -443,7 +443,7 @@ func (s *Service) UpdateTransfer(ctx context.Context, transferID string, token s
 		return err
 	}
 	if publicStatus(transfer) == models.TransferStatusDeleted {
-		return &HTTPError{Status: 410, Code: "deleted", Message: "transfer has been deleted"}
+		return &HTTPError{Status: 410, Code: "deleted", Message: "Transfer has been deleted"}
 	}
 
 	params := models.UpdateTransferParams{}
@@ -457,7 +457,7 @@ func (s *Service) UpdateTransfer(ctx context.Context, transferID string, token s
 	if strings.TrimSpace(request.CiphertextBase64) != "" {
 		payload, err := base64.StdEncoding.DecodeString(request.CiphertextBase64)
 		if err != nil || len(payload) == 0 {
-			return &HTTPError{Status: 400, Code: "invalid_manifest", Message: "updated manifest must be valid base64 ciphertext"}
+			return &HTTPError{Status: 400, Code: "invalid_manifest", Message: "Updated manifest must be valid base64 ciphertext"}
 		}
 		objectKey := transfer.ManifestObjectKey
 		if objectKey == "" {
@@ -500,7 +500,7 @@ func (s *Service) GetPublicTransfer(ctx context.Context, clientKey string, trans
 
 	transfer, err := s.repo.GetTransfer(ctx, transferID)
 	if errors.Is(err, repo.ErrNotFound) {
-		return PublicTransferResponse{}, &HTTPError{Status: 404, Code: "not_found", Message: "transfer not found"}
+		return PublicTransferResponse{}, &HTTPError{Status: 404, Code: "not_found", Message: "Transfer not found"}
 	}
 	if err != nil {
 		return PublicTransferResponse{}, err
@@ -538,13 +538,13 @@ func (s *Service) CreateDownloadURLs(ctx context.Context, clientKey string, tran
 
 	resume, err := s.repo.GetResumeState(ctx, transferID)
 	if errors.Is(err, repo.ErrNotFound) {
-		return nil, &HTTPError{Status: 404, Code: "not_found", Message: "transfer not found"}
+		return nil, &HTTPError{Status: 404, Code: "not_found", Message: "Transfer not found"}
 	}
 	if err != nil {
 		return nil, err
 	}
 	if publicStatus(resume.Transfer) != models.TransferStatusReady {
-		return nil, &HTTPError{Status: 409, Code: "transfer_unavailable", Message: "transfer is not available for download"}
+		return nil, &HTTPError{Status: 409, Code: "transfer_unavailable", Message: "Transfer is not available for download"}
 	}
 
 	uploaded := map[string]map[int]struct{}{}
@@ -559,10 +559,10 @@ func (s *Service) CreateDownloadURLs(ctx context.Context, clientKey string, tran
 	for _, chunk := range request.Chunks {
 		chunkSet, ok := uploaded[chunk.FileID]
 		if !ok {
-			return nil, &HTTPError{Status: 400, Code: "invalid_download_request", Message: "requested file is unavailable"}
+			return nil, &HTTPError{Status: 400, Code: "invalid_download_request", Message: "Requested file is unavailable"}
 		}
 		if _, ok = chunkSet[chunk.ChunkIndex]; !ok {
-			return nil, &HTTPError{Status: 400, Code: "invalid_download_request", Message: "requested chunk is unavailable"}
+			return nil, &HTTPError{Status: 400, Code: "invalid_download_request", Message: "Requested chunk is unavailable"}
 		}
 
 		url, err := s.storage.PresignDownload(ctx, chunkObjectKey(transferID, chunk.FileID, chunk.ChunkIndex), s.cfg.PresignTTL)
@@ -601,12 +601,12 @@ func (s *Service) CleanupExpired(ctx context.Context) error {
 // authorizeManage validates the owner token using a constant-time hash comparison.
 func (s *Service) authorizeManage(ctx context.Context, transferID string, token string) (models.Transfer, error) {
 	if strings.TrimSpace(token) == "" {
-		return models.Transfer{}, &HTTPError{Status: 401, Code: "missing_manage_token", Message: "manage token is required"}
+		return models.Transfer{}, &HTTPError{Status: 401, Code: "missing_manage_token", Message: "Manage token is required"}
 	}
 
 	transfer, err := s.repo.GetTransfer(ctx, transferID)
 	if errors.Is(err, repo.ErrNotFound) {
-		return models.Transfer{}, &HTTPError{Status: 404, Code: "not_found", Message: "transfer not found"}
+		return models.Transfer{}, &HTTPError{Status: 404, Code: "not_found", Message: "Transfer not found"}
 	}
 	if err != nil {
 		return models.Transfer{}, err
@@ -614,7 +614,7 @@ func (s *Service) authorizeManage(ctx context.Context, transferID string, token 
 
 	givenHash := hashToken(token)
 	if subtle.ConstantTimeCompare([]byte(givenHash), []byte(transfer.ManageTokenHash)) != 1 {
-		return models.Transfer{}, &HTTPError{Status: 403, Code: "invalid_manage_token", Message: "manage token is invalid"}
+		return models.Transfer{}, &HTTPError{Status: 403, Code: "invalid_manage_token", Message: "Manage token is invalid"}
 	}
 
 	return transfer, nil
@@ -627,7 +627,7 @@ func (s *Service) enforceRateLimit(ctx context.Context, key string, limit int, w
 		return fmt.Errorf("rate limit check: %w", err)
 	}
 	if !allowed {
-		return &HTTPError{Status: 429, Code: "rate_limited", Message: "too many requests"}
+		return &HTTPError{Status: 429, Code: "rate_limited", Message: "Too many requests"}
 	}
 
 	return nil
@@ -694,7 +694,7 @@ func requestedUpdateExpiry(request UpdateTransferRequest) (time.Duration, bool, 
 
 func validateExpiryDuration(duration time.Duration) (time.Duration, error) {
 	if !config.IsAllowedExpiry(duration) {
-		return 0, &HTTPError{Status: 400, Code: "invalid_expiry", Message: "expiry must match a supported option"}
+		return 0, &HTTPError{Status: 400, Code: "invalid_expiry", Message: "Expiry must match a supported option"}
 	}
 
 	return duration, nil

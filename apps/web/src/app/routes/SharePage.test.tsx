@@ -47,8 +47,10 @@ describe('SharePage', () => {
 
     expect(usePageMetadataMock).toHaveBeenCalledWith(
       expect.objectContaining({
+        description:
+          'Share an Xdrop end-to-end encrypted file transfer from this browser on this device while keeping plaintext file names, contents, and keys off the server.',
         exposeUrl: false,
-        title: 'Share This Transfer | Xdrop',
+        title: 'Share an End-to-End Encrypted Transfer | Xdrop',
       }),
     )
     expect(screen.getByText('Share t1')).toBeInTheDocument()
