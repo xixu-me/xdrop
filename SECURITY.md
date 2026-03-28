@@ -34,4 +34,4 @@ Xdrop is a file transfer system with browser-side encryption. Security-sensitive
 - share-link lifecycle, expiry, and delete controls
 - secrets, environment configuration, and deployment defaults
 
-Operational or configuration questions that are not vulnerabilities belong in [SUPPORT.md](SUPPORT.md).
+Operational or configuration questions that are not vulnerabilities belong in [`SUPPORT.md`](SUPPORT.md).

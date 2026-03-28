@@ -366,11 +366,11 @@ From the repo root in a second terminal:
 bun run dev:web
 ```
 
-Open [http://localhost:5173](http://localhost:5173). During local development, the Vite dev
+Open <http://localhost:5173>. During local development, the Vite dev
 server proxies:
 
-- `/api` to `http://localhost:8080`
-- `/xdrop` to `http://localhost:9000`
+- `/api` to <http://localhost:8080>
+- `/xdrop` to <http://localhost:9000>
 
 This keeps frontend hot reload while talking to the local Go API and MinIO.
 
@@ -394,7 +394,7 @@ Install Playwright browsers once if needed:
 bun run test:e2e:install
 ```
 
-The E2E suite expects Xdrop at `http://localhost:8080` by default and uses the local `postgres`
+The E2E suite expects Xdrop at <http://localhost:8080> by default and uses the local `postgres`
 and `redis` Compose services during the tests. Start the full stack first:
 
 ```bash

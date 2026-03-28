@@ -25,15 +25,15 @@ usability win.
 
 ## Before you start
 
-- Read [README.md](README.md) for the current project status and local setup.
-- Follow [MESSAGING.md](MESSAGING.md) when you touch README copy, homepage copy, SEO text, or
+- Read [`README.md`](README.md) for the current project status and local setup.
+- Follow [`MESSAGING.md`](MESSAGING.md) when you touch README copy, homepage copy, SEO text, or
   other product-facing messaging.
 - Search existing issues and pull requests before opening a new one.
 - For substantial features, architecture changes, or API contract changes, open an issue first.
-- For vulnerabilities or sensitive security concerns, follow [SECURITY.md](SECURITY.md) instead of
+- For vulnerabilities or sensitive security concerns, follow [`SECURITY.md`](SECURITY.md) instead of
   filing a public issue.
 - Keep general questions and troubleshooting in public channels when possible. See
-  [SUPPORT.md](SUPPORT.md).
+  [`SUPPORT.md`](SUPPORT.md).
 
 ## Development setup
 
@@ -59,7 +59,7 @@ defaults.
 docker compose -f docker-compose.yml -f docker-compose.build.yml up -d --build
 ```
 
-This brings up Xdrop, Postgres, Redis, and MinIO at `http://localhost:8080`.
+This brings up Xdrop, Postgres, Redis, and MinIO at <http://localhost:8080>.
 
 ### Run the frontend only
 

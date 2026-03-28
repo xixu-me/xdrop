@@ -326,10 +326,10 @@ go run ./cmd/api
 bun run dev:web
 ```
 
-打开 [http://localhost:5173](http://localhost:5173)。本地开发时，Vite 开发服务器会代理：
+打开 <http://localhost:5173>。本地开发时，Vite 开发服务器会代理：
 
-- `/api` 到 `http://localhost:8080`
-- `/xdrop` 到 `http://localhost:9000`
+- `/api` 到 <http://localhost:8080>
+- `/xdrop` 到 <http://localhost:9000>
 
 这样既能保留前端热更新，也能连接本地 Go API 和 MinIO。
 
@@ -353,7 +353,7 @@ bun run build:web
 bun run test:e2e:install
 ```
 
-E2E 套件默认会访问 `http://localhost:8080` 上的 Xdrop，并在测试期间使用本地 Compose 启动的 `postgres` 和 `redis` 服务。请先启动完整栈：
+E2E 套件默认会访问 <http://localhost:8080> 上的 Xdrop，并在测试期间使用本地 Compose 启动的 `postgres` 和 `redis` 服务。请先启动完整栈：
 
 ```bash
 docker compose -f docker-compose.yml -f docker-compose.build.yml up -d --build
