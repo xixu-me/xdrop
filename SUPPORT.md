@@ -43,7 +43,7 @@ Please share enough context for someone else to help:
 Do not file public issues for vulnerabilities, exposed secrets, or anything that could put users at
 risk.
 
-Follow [SECURITY.md](SECURITY.md) and email [i@xi-xu.me](mailto:i@xi-xu.me) instead.
+Follow [`SECURITY.md`](SECURITY.md) and email [i@xi-xu.me](mailto:i@xi-xu.me) instead.
 
 ## Before you open an issue
 

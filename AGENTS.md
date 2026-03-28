@@ -16,7 +16,7 @@ Install JS dependencies once with `bun install --frozen-lockfile`.
 - `bun run format` / `bun run format:check`: run Prettier plus Go formatting checks.
 - `go test ./... -coverprofile=coverage.out -covermode=atomic` from `apps/api`: run API tests the same way CI does.
 - `go run ./cmd/api` from `apps/api`: run the API locally.
-- `docker compose -f docker-compose.yml -f docker-compose.build.yml up -d --build`: boot the full stack on `http://localhost:8080`.
+- `docker compose -f docker-compose.yml -f docker-compose.build.yml up -d --build`: boot the full stack on <http://localhost:8080>.
 
 ## Coding Style & Naming Conventions
 
