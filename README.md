@@ -75,10 +75,10 @@ Humans can also open the share link directly in a browser to decrypt and downloa
 Agents can use Xdrop to upload files, return end-to-end encrypted share links, and use Xdrop
 links for local decryption.
 
-Install the bundled skill:
+Install the companion skill:
 
 ```bash
-bunx skills add xixu-me/xdrop
+bunx skills add xixu-me/skills -s xdrop
 ```
 
 After that, the agent can use Xdrop from the terminal to:
