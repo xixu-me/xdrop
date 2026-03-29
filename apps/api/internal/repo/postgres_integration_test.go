@@ -2,16 +2,14 @@ package repo
 
 import (
 	"context"
-	"os/exec"
-	"runtime"
+	"fmt"
 	"testing"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/stretchr/testify/require"
-	"github.com/testcontainers/testcontainers-go"
-	tcpostgres "github.com/testcontainers/testcontainers-go/modules/postgres"
 	"github.com/xdrop/monorepo/internal/models"
+	"github.com/xdrop/monorepo/internal/testutil"
 )
 
 func TestRunMigrationsAndRepositoryLifecycle(t *testing.T) {
@@ -216,26 +214,27 @@ func TestPostgresRepositoryCleanupCandidatesAndPurging(t *testing.T) {
 func startPostgresTestDB(t *testing.T, ctx context.Context) *pgxpool.Pool {
 	t.Helper()
 
-	container, err := tcpostgres.Run(
-		ctx,
-		"postgres:16-alpine",
-		tcpostgres.WithDatabase("xdrop"),
-		tcpostgres.WithUsername("xdrop"),
-		tcpostgres.WithPassword("xdrop"),
-		tcpostgres.BasicWaitStrategies(),
-	)
-	require.NoError(t, err)
-	t.Cleanup(func() {
-		require.NoError(t, testcontainers.TerminateContainer(container))
+	container := testutil.StartDockerContainer(t, ctx, testutil.DockerRunRequest{
+		NamePrefix: "xdrop-postgres",
+		Image:      "postgres:16-alpine",
+		Env: map[string]string{
+			"POSTGRES_DB":       "xdrop",
+			"POSTGRES_USER":     "xdrop",
+			"POSTGRES_PASSWORD": "xdrop",
+		},
+		ExposedPorts: []string{"5432/tcp"},
 	})
 
-	connectionString, err := container.ConnectionString(ctx, "sslmode=disable")
-	require.NoError(t, err)
-
+	connectionString := fmt.Sprintf(
+		"postgres://xdrop:xdrop@127.0.0.1:%s/xdrop?sslmode=disable",
+		container.PublishedPort(t, ctx, "5432/tcp"),
+	)
 	db, err := pgxpool.New(ctx, connectionString)
 	require.NoError(t, err)
-	require.NoError(t, db.Ping(ctx))
 	t.Cleanup(db.Close)
+	require.NoError(t, testutil.WaitForCondition(ctx, 60*time.Second, 500*time.Millisecond, func() error {
+		return db.Ping(ctx)
+	}))
 
 	return db
 }
@@ -258,15 +257,5 @@ func int64ptr(value int64) *int64 {
 
 func skipIfDockerUnavailable(t *testing.T) {
 	t.Helper()
-
-	if testing.Short() {
-		t.Skip("skipping docker-backed integration test in short mode")
-	}
-	if runtime.GOOS == "windows" {
-		t.Skip("skipping docker-backed integration test on windows")
-	}
-
-	if err := exec.Command("docker", "info").Run(); err != nil {
-		t.Skipf("skipping docker-backed integration test: %v", err)
-	}
+	testutil.SkipIfDockerUnavailable(t, true)
 }

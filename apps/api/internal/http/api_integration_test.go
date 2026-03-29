@@ -10,22 +10,18 @@ import (
 	"log/slog"
 	nethttp "net/http"
 	"net/http/httptest"
-	"os/exec"
-	"runtime"
 	"testing"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/require"
-	"github.com/testcontainers/testcontainers-go"
-	tcpostgres "github.com/testcontainers/testcontainers-go/modules/postgres"
-	"github.com/testcontainers/testcontainers-go/wait"
 	"github.com/xdrop/monorepo/internal/config"
 	"github.com/xdrop/monorepo/internal/ratelimit"
 	"github.com/xdrop/monorepo/internal/repo"
 	"github.com/xdrop/monorepo/internal/service"
 	"github.com/xdrop/monorepo/internal/storage"
+	"github.com/xdrop/monorepo/internal/testutil"
 )
 
 func TestAPITransferLifecycleEndToEnd(t *testing.T) {
@@ -179,26 +175,27 @@ func startHTTPIntegrationStack(t *testing.T, ctx context.Context) httpIntegratio
 func startHTTPPostgresDB(t *testing.T, ctx context.Context) *pgxpool.Pool {
 	t.Helper()
 
-	container, err := tcpostgres.Run(
-		ctx,
-		"postgres:16-alpine",
-		tcpostgres.WithDatabase("xdrop"),
-		tcpostgres.WithUsername("xdrop"),
-		tcpostgres.WithPassword("xdrop"),
-		tcpostgres.BasicWaitStrategies(),
-	)
-	require.NoError(t, err)
-	t.Cleanup(func() {
-		require.NoError(t, testcontainers.TerminateContainer(container))
+	container := testutil.StartDockerContainer(t, ctx, testutil.DockerRunRequest{
+		NamePrefix: "xdrop-http-postgres",
+		Image:      "postgres:16-alpine",
+		Env: map[string]string{
+			"POSTGRES_DB":       "xdrop",
+			"POSTGRES_USER":     "xdrop",
+			"POSTGRES_PASSWORD": "xdrop",
+		},
+		ExposedPorts: []string{"5432/tcp"},
 	})
 
-	connectionString, err := container.ConnectionString(ctx, "sslmode=disable")
-	require.NoError(t, err)
-
+	connectionString := fmt.Sprintf(
+		"postgres://xdrop:xdrop@127.0.0.1:%s/xdrop?sslmode=disable",
+		container.PublishedPort(t, ctx, "5432/tcp"),
+	)
 	db, err := pgxpool.New(ctx, connectionString)
 	require.NoError(t, err)
-	require.NoError(t, db.Ping(ctx))
 	t.Cleanup(db.Close)
+	require.NoError(t, testutil.WaitForCondition(ctx, 60*time.Second, 500*time.Millisecond, func() error {
+		return db.Ping(ctx)
+	}))
 
 	return db
 }
@@ -206,29 +203,19 @@ func startHTTPPostgresDB(t *testing.T, ctx context.Context) *pgxpool.Pool {
 func startHTTPRedisClient(t *testing.T, ctx context.Context) *redis.Client {
 	t.Helper()
 
-	container, err := testcontainers.Run(
-		ctx,
-		"redis:7-alpine",
-		testcontainers.WithExposedPorts("6379/tcp"),
-		testcontainers.WithWaitStrategy(
-			wait.ForLog("Ready to accept connections").WithStartupTimeout(60*time.Second),
-		),
-	)
-	require.NoError(t, err)
-	t.Cleanup(func() {
-		require.NoError(t, testcontainers.TerminateContainer(container))
+	container := testutil.StartDockerContainer(t, ctx, testutil.DockerRunRequest{
+		NamePrefix:   "xdrop-http-redis",
+		Image:        "redis:7-alpine",
+		ExposedPorts: []string{"6379/tcp"},
 	})
-
-	host, err := container.Host(ctx)
-	require.NoError(t, err)
-	port, err := container.MappedPort(ctx, "6379/tcp")
-	require.NoError(t, err)
 
 	client := redis.NewClient(&redis.Options{
-		Addr: fmt.Sprintf("%s:%s", host, port.Port()),
+		Addr: fmt.Sprintf("127.0.0.1:%s", container.PublishedPort(t, ctx, "6379/tcp")),
 		DB:   0,
 	})
-	require.NoError(t, client.Ping(ctx).Err())
+	require.NoError(t, testutil.WaitForCondition(ctx, 60*time.Second, 500*time.Millisecond, func() error {
+		return client.Ping(ctx).Err()
+	}))
 	t.Cleanup(func() {
 		require.NoError(t, client.Close())
 	})
@@ -239,32 +226,29 @@ func startHTTPRedisClient(t *testing.T, ctx context.Context) *redis.Client {
 func startHTTPStorage(t *testing.T, ctx context.Context) (*storage.S3Storage, config.Config) {
 	t.Helper()
 
-	container, err := testcontainers.Run(
-		ctx,
-		"minio/minio:latest",
-		testcontainers.WithEnv(map[string]string{
+	container := testutil.StartDockerContainer(t, ctx, testutil.DockerRunRequest{
+		NamePrefix: "xdrop-http-minio",
+		Image:      "minio/minio:latest",
+		Env: map[string]string{
 			"MINIO_ROOT_USER":     "minioadmin",
 			"MINIO_ROOT_PASSWORD": "minioadmin",
-		}),
-		testcontainers.WithExposedPorts("9000/tcp"),
-		testcontainers.WithCmd("server", "/data"),
-		testcontainers.WithWaitStrategy(
-			wait.ForHTTP("/minio/health/live").
-				WithPort("9000/tcp").
-				WithStartupTimeout(90*time.Second),
-		),
-	)
-	require.NoError(t, err)
-	t.Cleanup(func() {
-		require.NoError(t, testcontainers.TerminateContainer(container))
+		},
+		ExposedPorts: []string{"9000/tcp"},
+		Command:      []string{"server", "/data"},
 	})
 
-	host, err := container.Host(ctx)
-	require.NoError(t, err)
-	port, err := container.MappedPort(ctx, "9000/tcp")
-	require.NoError(t, err)
-
-	endpoint := fmt.Sprintf("http://%s:%s", host, port.Port())
+	endpoint := fmt.Sprintf("http://127.0.0.1:%s", container.PublishedPort(t, ctx, "9000/tcp"))
+	require.NoError(t, testutil.WaitForCondition(ctx, 90*time.Second, 500*time.Millisecond, func() error {
+		response, err := nethttp.Get(endpoint + "/minio/health/live")
+		if err != nil {
+			return err
+		}
+		defer response.Body.Close()
+		if response.StatusCode >= 400 {
+			return fmt.Errorf("minio returned status %d", response.StatusCode)
+		}
+		return nil
+	}))
 	objectStorage, err := storage.NewS3Storage(ctx, storage.Config{
 		Endpoint:       endpoint,
 		PublicEndpoint: endpoint,
@@ -325,15 +309,5 @@ func doJSON(t *testing.T, client *nethttp.Client, method string, url string, bea
 
 func skipIfDockerUnavailable(t *testing.T) {
 	t.Helper()
-
-	if testing.Short() {
-		t.Skip("skipping docker-backed integration test in short mode")
-	}
-	if runtime.GOOS == "windows" {
-		t.Skip("skipping docker-backed integration test on windows")
-	}
-
-	if err := exec.Command("docker", "info").Run(); err != nil {
-		t.Skipf("skipping docker-backed integration test: %v", err)
-	}
+	testutil.SkipIfDockerUnavailable(t, true)
 }
