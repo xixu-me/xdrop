@@ -3,14 +3,12 @@ package ratelimit
 import (
 	"context"
 	"fmt"
-	"os/exec"
 	"testing"
 	"time"
 
 	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/require"
-	"github.com/testcontainers/testcontainers-go"
-	"github.com/testcontainers/testcontainers-go/wait"
+	"github.com/xdrop/monorepo/internal/testutil"
 )
 
 func TestRedisLimiterBlocksThenResetsAfterWindow(t *testing.T) {
@@ -39,29 +37,19 @@ func TestRedisLimiterBlocksThenResetsAfterWindow(t *testing.T) {
 func startRedisClient(t *testing.T, ctx context.Context) *redis.Client {
 	t.Helper()
 
-	container, err := testcontainers.Run(
-		ctx,
-		"redis:7-alpine",
-		testcontainers.WithExposedPorts("6379/tcp"),
-		testcontainers.WithWaitStrategy(
-			wait.ForLog("Ready to accept connections").WithStartupTimeout(60*time.Second),
-		),
-	)
-	require.NoError(t, err)
-	t.Cleanup(func() {
-		require.NoError(t, testcontainers.TerminateContainer(container))
+	container := testutil.StartDockerContainer(t, ctx, testutil.DockerRunRequest{
+		NamePrefix:   "xdrop-redis",
+		Image:        "redis:7-alpine",
+		ExposedPorts: []string{"6379/tcp"},
 	})
-
-	host, err := container.Host(ctx)
-	require.NoError(t, err)
-	port, err := container.MappedPort(ctx, "6379/tcp")
-	require.NoError(t, err)
 
 	client := redis.NewClient(&redis.Options{
-		Addr: fmt.Sprintf("%s:%s", host, port.Port()),
+		Addr: fmt.Sprintf("127.0.0.1:%s", container.PublishedPort(t, ctx, "6379/tcp")),
 		DB:   0,
 	})
-	require.NoError(t, client.Ping(ctx).Err())
+	require.NoError(t, testutil.WaitForCondition(ctx, 60*time.Second, 500*time.Millisecond, func() error {
+		return client.Ping(ctx).Err()
+	}))
 	t.Cleanup(func() {
 		require.NoError(t, client.Close())
 	})
@@ -71,12 +59,5 @@ func startRedisClient(t *testing.T, ctx context.Context) *redis.Client {
 
 func skipIfDockerUnavailable(t *testing.T) {
 	t.Helper()
-
-	if testing.Short() {
-		t.Skip("skipping docker-backed integration test in short mode")
-	}
-
-	if err := exec.Command("docker", "info").Run(); err != nil {
-		t.Skipf("skipping docker-backed integration test: %v", err)
-	}
+	testutil.SkipIfDockerUnavailable(t, false)
 }

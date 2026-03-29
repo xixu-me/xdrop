@@ -3,8 +3,7 @@ package storage
 import (
 	"context"
 	"fmt"
-	"os/exec"
-	"runtime"
+	nethttp "net/http"
 	"strings"
 	"testing"
 	"time"
@@ -12,8 +11,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/stretchr/testify/require"
-	"github.com/testcontainers/testcontainers-go"
-	"github.com/testcontainers/testcontainers-go/wait"
+	"github.com/xdrop/monorepo/internal/testutil"
 )
 
 func TestS3StorageLifecycleAgainstMinIO(t *testing.T) {
@@ -84,32 +82,31 @@ func TestReadAllReadsEntireStream(t *testing.T) {
 func startMinIOConfig(t *testing.T, ctx context.Context) Config {
 	t.Helper()
 
-	container, err := testcontainers.Run(
-		ctx,
-		"minio/minio:latest",
-		testcontainers.WithEnv(map[string]string{
+	container := testutil.StartDockerContainer(t, ctx, testutil.DockerRunRequest{
+		NamePrefix: "xdrop-minio",
+		Image:      "minio/minio:latest",
+		Env: map[string]string{
 			"MINIO_ROOT_USER":     "minioadmin",
 			"MINIO_ROOT_PASSWORD": "minioadmin",
-		}),
-		testcontainers.WithExposedPorts("9000/tcp"),
-		testcontainers.WithCmd("server", "/data"),
-		testcontainers.WithWaitStrategy(
-			wait.ForHTTP("/minio/health/live").
-				WithPort("9000/tcp").
-				WithStartupTimeout(90*time.Second),
-		),
-	)
-	require.NoError(t, err)
-	t.Cleanup(func() {
-		require.NoError(t, testcontainers.TerminateContainer(container))
+		},
+		ExposedPorts: []string{"9000/tcp"},
+		Command:      []string{"server", "/data"},
 	})
 
-	host, err := container.Host(ctx)
-	require.NoError(t, err)
-	port, err := container.MappedPort(ctx, "9000/tcp")
-	require.NoError(t, err)
+	port := container.PublishedPort(t, ctx, "9000/tcp")
+	internalEndpoint := fmt.Sprintf("http://127.0.0.1:%s", port)
+	require.NoError(t, testutil.WaitForCondition(ctx, 90*time.Second, 500*time.Millisecond, func() error {
+		response, err := nethttp.Get(internalEndpoint + "/minio/health/live")
+		if err != nil {
+			return err
+		}
+		defer response.Body.Close()
+		if response.StatusCode >= 400 {
+			return fmt.Errorf("minio returned status %d", response.StatusCode)
+		}
+		return nil
+	}))
 
-	internalEndpoint := fmt.Sprintf("http://%s:%s", host, port.Port())
 	return Config{
 		Endpoint:       internalEndpoint,
 		PublicEndpoint: "http://public.example.test:9000",
@@ -158,15 +155,5 @@ func listObjectKeys(t *testing.T, ctx context.Context, store *S3Storage) []strin
 
 func skipIfDockerUnavailable(t *testing.T) {
 	t.Helper()
-
-	if testing.Short() {
-		t.Skip("skipping docker-backed integration test in short mode")
-	}
-	if runtime.GOOS == "windows" {
-		t.Skip("skipping docker-backed integration test on windows")
-	}
-
-	if err := exec.Command("docker", "info").Run(); err != nil {
-		t.Skipf("skipping docker-backed integration test: %v", err)
-	}
+	testutil.SkipIfDockerUnavailable(t, true)
 }
