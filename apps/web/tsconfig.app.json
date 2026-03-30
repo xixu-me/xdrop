@@ -10,9 +10,8 @@
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
     "noUncheckedSideEffectImports": true,
-    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"]
     }
   },
   "include": ["src"]
