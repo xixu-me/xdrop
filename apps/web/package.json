@@ -21,7 +21,7 @@
     "qrcode": "^1.5.4",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "react-router-dom": "^7.9.6",
+    "react-router-dom": "^7.13.2",
     "zod": "^4.1.12"
   },
   "devDependencies": {
@@ -33,7 +33,7 @@
     "@types/qrcode": "^1.5.5",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "@vitest/coverage-v8": "^4.0.7",
+    "@vitest/coverage-v8": "^4.1.2",
     "@vitejs/plugin-react": "^6.0.1",
     "eslint": "^10.1.0",
     "eslint-plugin-react-hooks": "^7.0.1",
@@ -42,8 +42,8 @@
     "globals": "^17.4.0",
     "jsdom": "^29.0.1",
     "typescript": "~5.9.3",
-    "typescript-eslint": "^8.56.1",
-    "vite": "^8.0.1",
-    "vitest": "^4.0.7"
+    "typescript-eslint": "^8.57.2",
+    "vite": "^8.0.3",
+    "vitest": "^4.1.2"
   }
 }
