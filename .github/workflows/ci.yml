@@ -108,7 +108,7 @@ jobs:
 
       - name: Upload web coverage to Codecov
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && env.CODECOV_TOKEN != '' }}
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
         with:
           files: apps/web/coverage/lcov.codecov.info
           flags: frontend
@@ -171,7 +171,7 @@ jobs:
 
       - name: Upload API coverage to Codecov
         if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && env.CODECOV_TOKEN != '' }}
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
         with:
           files: apps/api/coverage.codecov.out
           flags: backend
