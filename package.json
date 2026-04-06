@@ -16,7 +16,7 @@
     "packages/shared"
   ],
   "devDependencies": {
-    "@playwright/test": "^1.54.2",
+    "@playwright/test": "^1.59.1",
     "prettier": "^3.6.2"
   },
   "overrides": {
