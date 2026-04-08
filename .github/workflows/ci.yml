@@ -149,7 +149,8 @@ jobs:
           fi
 
       - name: Run API tests with coverage
-        run: go test ./... -coverprofile=coverage.out -covermode=atomic
+        shell: bash
+        run: go test $(go list ./... | grep -v '/internal/testutil$') -coverprofile=coverage.out -covermode=atomic
 
       - name: Print API coverage summary
         run: go tool cover -func=coverage.out

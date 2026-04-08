@@ -137,6 +137,48 @@ describe('persistentSources', () => {
     ).resolves.toBeNull()
   })
 
+  it('returns null when navigator is unavailable or the OPFS root cannot be opened', async () => {
+    const originalNavigator = globalThis.navigator
+
+    Object.defineProperty(globalThis, 'navigator', {
+      configurable: true,
+      value: undefined,
+    })
+
+    await expect(
+      persistSourceToOpfs({
+        file: new File(['hello'], 'draft.txt'),
+        fileId: 'file-1',
+        relativePath: 'draft.txt',
+        transferId: 'transfer-1',
+      }),
+    ).resolves.toBeNull()
+
+    Object.defineProperty(globalThis, 'navigator', {
+      configurable: true,
+      value: originalNavigator,
+    })
+
+    const harness = createOpfsHarness()
+    harness.storage.getDirectory.mockResolvedValueOnce({
+      getDirectoryHandle: vi.fn(async () => {
+        throw new Error('denied')
+      }),
+      getFileHandle: vi.fn(),
+      removeEntry: vi.fn(async () => {}),
+    })
+    stubStorage(harness.storage)
+
+    await expect(
+      persistSourceToOpfs({
+        file: new File(['hello'], 'draft.txt'),
+        fileId: 'file-1',
+        relativePath: 'draft.txt',
+        transferId: 'transfer-1',
+      }),
+    ).resolves.toBeNull()
+  })
+
   it('restores indexeddb-backed files and handles missing files', async () => {
     const file = new File(['payload'], 'example.txt', { type: 'text/plain', lastModified: 5 })
 

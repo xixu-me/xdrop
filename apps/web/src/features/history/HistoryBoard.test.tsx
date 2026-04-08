@@ -159,4 +159,44 @@ describe('HistoryBoard', () => {
     expect(screen.getByText('Could not update this transfer right now.')).toBeInTheDocument()
     expect(deleteTransferMock).toHaveBeenCalledWith('ready-1')
   })
+
+  it('lets local-only transfers cancel a pending forget action and clears stale errors on retry', async () => {
+    transfersState.splice(
+      0,
+      transfersState.length,
+      createTransfer('local-only-2', 'Forgotten transfer', '2026-03-21T10:00:00.000Z', {
+        manageToken: '',
+      }),
+    )
+    deleteTransferMock.mockRejectedValueOnce(new Error('Delete failed'))
+    deleteTransferMock.mockResolvedValueOnce(undefined)
+
+    renderBoard()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Forget local copy' }))
+    expect(screen.getByText(/Confirm forget to remove this local record/i)).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm forget' }))
+
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(screen.getByText('Delete failed')).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }))
+    expect(screen.queryByRole('button', { name: 'Confirm forget' })).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Forget local copy' }))
+    expect(screen.queryByText('Delete failed')).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Confirm forget' }))
+
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(deleteTransferMock).toHaveBeenCalledTimes(2)
+    expect(screen.queryByRole('button', { name: 'Confirm forget' })).not.toBeInTheDocument()
+  })
 })

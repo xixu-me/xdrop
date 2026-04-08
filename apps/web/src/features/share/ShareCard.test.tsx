@@ -212,6 +212,37 @@ describe('ShareCard', () => {
     expect(screen.getByRole('button', { name: 'Copied' })).toBeInTheDocument()
   })
 
+  it('falls back to copying when the share sheet fails for non-abort reasons', async () => {
+    const shareMock = vi.fn(async () => {
+      throw new Error('share failed')
+    })
+    Object.assign(navigator, { share: shareMock })
+
+    render(
+      <MemoryRouter>
+        <ShareCard
+          transfer={createTransfer('active-4b', 'Fallback transfer', '2026-03-21T10:00:00.000Z')}
+          onExtendTransfer={extendTransferMock}
+        />
+      </MemoryRouter>,
+    )
+
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Share link' }))
+
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(shareMock).toHaveBeenCalledTimes(1)
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(
+      'https://example.com/t/active-4b#k=test',
+    )
+  })
+
   it('shows a retry-focused fallback when clipboard access fails', async () => {
     Object.assign(navigator, {
       clipboard: {
@@ -430,6 +461,43 @@ describe('ShareCard', () => {
     expect(
       screen.queryByRole('button', { name: /Set expiry to 1 week from now/i }),
     ).not.toBeInTheDocument()
+  })
+
+  it('guards copy and share handlers when a transfer has no share link', async () => {
+    render(
+      <MemoryRouter>
+        <ShareCard
+          transfer={createTransfer('active-10', 'Missing share link', '2026-03-21T10:00:00.000Z', {
+            shareUrl: '',
+          })}
+          onExtendTransfer={extendTransferMock}
+        />
+      </MemoryRouter>,
+    )
+
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    const copyButton = screen.getByRole('button', { name: 'Copy link' }) as HTMLButtonElement
+    const shareButton = screen.getByRole('button', { name: 'Share link' }) as HTMLButtonElement
+
+    expect(copyButton).toBeDisabled()
+    expect(shareButton).toBeDisabled()
+
+    copyButton.disabled = false
+    shareButton.disabled = false
+
+    fireEvent.click(copyButton)
+    fireEvent.click(shareButton)
+
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(navigator.clipboard.writeText).not.toHaveBeenCalled()
+    expect(toDataUrlMock).not.toHaveBeenCalled()
+    expect(document.querySelector('.qr-placeholder')).not.toBeNull()
   })
 
   it('keeps the QR placeholder when QR generation fails', async () => {

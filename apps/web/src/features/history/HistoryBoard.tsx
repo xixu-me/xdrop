@@ -65,7 +65,7 @@ export function HistoryBoard() {
     clearActionError(transferId)
     try {
       await deleteTransfer(transferId)
-      setPendingDeleteTransferId((current) => (current === transferId ? undefined : current))
+      setPendingDeleteTransferId(undefined)
     } catch (error) {
       setActionError(transferId, error)
     }
@@ -170,11 +170,7 @@ export function HistoryBoard() {
                 </Button>
                 <Button
                   tone="ghost"
-                  onClick={() =>
-                    setPendingDeleteTransferId((current) =>
-                      current === transfer.id ? undefined : current,
-                    )
-                  }
+                  onClick={() => setPendingDeleteTransferId(undefined)}
                 >
                   Cancel
                 </Button>

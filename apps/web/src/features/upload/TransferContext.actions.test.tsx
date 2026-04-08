@@ -554,4 +554,41 @@ describe('TransferProvider actions', () => {
       ).toBeInTheDocument()
     })
   })
+
+  it('aborts active upload runtimes when deleting a transfer mid-flight', async () => {
+    transfersStore.set('t1', makeTransferRecord('uploading'))
+    sourcesStore.set('t1:file-1', makeSourceRecord('t1'))
+
+    let aborts = 0
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(
+        (_url: string, init?: RequestInit) =>
+          new Promise((_, reject) => {
+            const signal = init?.signal as AbortSignal | undefined
+            signal?.addEventListener('abort', () => {
+              aborts += 1
+              reject(new DOMException('aborted', 'AbortError'))
+            })
+          }),
+      ),
+    )
+
+    renderProvider()
+
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalled()
+    })
+    await waitFor(() => expect(latestContext).not.toBeNull())
+
+    await act(async () => {
+      await latestContext?.deleteTransfer('t1')
+    })
+
+    expect(aborts).toBeGreaterThan(0)
+    expect(deleteRemoteTransferMock).toHaveBeenCalledWith('t1', 'manage-token')
+    expect(deletePersistedTransferSourcesMock).toHaveBeenCalledWith('t1')
+    expect(deleteTransferRecordMock).toHaveBeenCalledWith('t1')
+    expect(transfersStore.has('t1')).toBe(false)
+  })
 })
