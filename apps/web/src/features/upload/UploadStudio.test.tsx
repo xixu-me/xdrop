@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import {
   DEFAULT_EXPIRY_SECONDS,
   EXPIRY_OPTIONS,
@@ -353,6 +353,69 @@ describe('UploadStudio', () => {
     expect(
       await screen.findByText("Couldn't keep this selection after refresh."),
     ).toBeInTheDocument()
+  })
+
+  it('avoids updating state when draft persistence resolves after unmount', async () => {
+    const persistedFile = new File(['hello'], 'draft.txt', { lastModified: 12, type: 'text/plain' })
+    let resolvePersist: ((sources: typeof draftState.sources) => void) | undefined
+    persistDraftMock.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolvePersist = resolve
+        }),
+    )
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    const { container, unmount } = renderStudio()
+
+    fireEvent.change(container.querySelector('input[type="file"]') as HTMLInputElement, {
+      target: { files: [persistedFile] },
+    })
+
+    unmount()
+
+    await act(async () => {
+      resolvePersist?.([
+        {
+          draftKey: 'draft-1',
+          file: persistedFile,
+          relativePath: 'draft.txt',
+        },
+      ])
+      await Promise.resolve()
+    })
+
+    expect(errorSpy).not.toHaveBeenCalled()
+    errorSpy.mockRestore()
+  })
+
+  it('avoids surfacing persistence errors after unmount', async () => {
+    let rejectPersist: ((reason?: unknown) => void) | undefined
+    persistDraftMock.mockImplementationOnce(
+      () =>
+        new Promise((_, reject) => {
+          rejectPersist = reject
+        }),
+    )
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    const { container, unmount } = renderStudio()
+
+    fireEvent.change(container.querySelector('input[type="file"]') as HTMLInputElement, {
+      target: {
+        files: [new File(['hello'], 'draft.txt', { lastModified: 12, type: 'text/plain' })],
+      },
+    })
+
+    unmount()
+
+    await act(async () => {
+      rejectPersist?.(new Error('persist failed'))
+      await Promise.resolve()
+    })
+
+    expect(errorSpy).not.toHaveBeenCalled()
+    errorSpy.mockRestore()
   })
 
   it('prefers webkitRelativePath over the bare filename when a folder is chosen', async () => {

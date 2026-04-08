@@ -153,12 +153,6 @@ export function UploadStudio() {
 
   /** launchTransfer hands the staged sources to the transfer runtime and navigates to share view. */
   const launchTransfer = async () => {
-    if (selectionLimitError) {
-      setSelectionError(selectionLimitError)
-      setLaunchError(undefined)
-      return
-    }
-
     try {
       setIsLaunching(true)
       setLaunchError(undefined)

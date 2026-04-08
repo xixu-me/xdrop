@@ -78,64 +78,61 @@ export function ShareCard({ transfer, onExtendTransfer }: Props) {
   }, [qrShareUrl])
 
   /** copyLink writes the full share URL, including the `#k=` fragment, to the clipboard. */
-  const copyLink = async () => {
-    if (!transfer?.shareUrl || !canShareLink) {
-      return
-    }
-    try {
-      setActionError(undefined)
-      await navigator.clipboard.writeText(transfer.shareUrl)
-      setCopyState('copied')
-      window.setTimeout(() => setCopyState('idle'), 1800)
-    } catch {
-      setCopyState('idle')
-      setActionError('Copy failed. Use your browser share tools or try again on this device.')
-    }
-  }
+  const copyLink = qrShareUrl
+    ? async () => {
+        try {
+          setActionError(undefined)
+          await navigator.clipboard.writeText(qrShareUrl)
+          setCopyState('copied')
+          window.setTimeout(() => setCopyState('idle'), 1800)
+        } catch {
+          setCopyState('idle')
+          setActionError('Copy failed. Use your browser share tools or try again on this device.')
+        }
+      }
+    : undefined
 
   /** shareLink uses the platform share sheet when available and falls back to copying. */
-  const shareLink = async () => {
-    if (!transfer?.shareUrl || !canShareLink) {
-      return
-    }
-    if (navigator.share) {
-      try {
-        setActionError(undefined)
-        await navigator.share({
-          title: transfer.displayName,
-          url: transfer.shareUrl,
-          text: 'Encrypted files via Xdrop',
-        })
-        return
-      } catch (error) {
-        if (isAbortLike(error)) {
-          return
+  const shareLink = qrShareUrl
+    ? async () => {
+        if (navigator.share) {
+          try {
+            setActionError(undefined)
+            await navigator.share({
+              title: transfer?.displayName,
+              url: qrShareUrl,
+              text: 'Encrypted files via Xdrop',
+            })
+            return
+          } catch (error) {
+            if (isAbortLike(error)) {
+              return
+            }
+            await copyLink?.()
+            return
+          }
         }
-        await copyLink()
-        return
+
+        await copyLink?.()
       }
-    }
+    : undefined
 
-    await copyLink()
-  }
-
-  const extendExpiry = async () => {
-    if (!transfer || !canExtendTransfer || !onExtendTransfer) {
-      return
-    }
-
-    try {
-      setActionError(undefined)
-      setIsExtending(true)
-      await onExtendTransfer(transfer.id, MAX_EXPIRY_SECONDS)
-    } catch (error) {
-      setActionError(
-        error instanceof Error ? error.message : 'Could not update this transfer right now.',
-      )
-    } finally {
-      setIsExtending(false)
-    }
-  }
+  const extendExpiry =
+    canExtendTransfer && transfer && onExtendTransfer
+      ? async () => {
+          try {
+            setActionError(undefined)
+            setIsExtending(true)
+            await onExtendTransfer(transfer.id, MAX_EXPIRY_SECONDS)
+          } catch (error) {
+            setActionError(
+              error instanceof Error ? error.message : 'Could not update this transfer right now.',
+            )
+          } finally {
+            setIsExtending(false)
+          }
+        }
+      : undefined
 
   if (!transfer) {
     return (
@@ -229,13 +226,17 @@ export function ShareCard({ transfer, onExtendTransfer }: Props) {
         </dl>
 
         <div className="button-row">
-          <Button onClick={() => void copyLink()} disabled={!canShareLink}>
+          <Button onClick={copyLink ? () => void copyLink() : undefined} disabled={!copyLink}>
             {copyState === 'copied' ? 'Copied' : 'Copy link'}
           </Button>
-          <Button onClick={() => void shareLink()} tone="ghost" disabled={!canShareLink}>
+          <Button
+            onClick={shareLink ? () => void shareLink() : undefined}
+            tone="ghost"
+            disabled={!shareLink}
+          >
             Share link
           </Button>
-          {canExtendTransfer ? (
+          {extendExpiry ? (
             <Button tone="ghost" onClick={() => void extendExpiry()} disabled={isExtending}>
               {isExtending
                 ? 'Updating expiry…'

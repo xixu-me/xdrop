@@ -1,9 +1,18 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vitest'
 
 import { sanitizePath } from '@/lib/files/paths'
 import { buildBinaryZip, buildTextZip, buildZip, writeZipStream } from './zip'
 
 describe('zip builder', () => {
+  const OriginalResponse = globalThis.Response
+
+  afterEach(() => {
+    Object.defineProperty(globalThis, 'Response', {
+      configurable: true,
+      value: OriginalResponse,
+    })
+  })
+
   it('preserves sanitized folder structure', async () => {
     const zipBlob = await buildZip([
       { path: '../folder/photo.png', blob: new Blob(['a']) },
@@ -100,5 +109,50 @@ describe('zip builder', () => {
       ),
     ).resolves.toBeUndefined()
     expect(chunks.length).toBeGreaterThan(0)
+  })
+
+  it('uses arrayBuffer-backed blobs when stream() is unavailable', async () => {
+    const blobLike = {
+      arrayBuffer: async () => new TextEncoder().encode('hello').buffer,
+      size: 5,
+      type: 'text/plain',
+    } as unknown as Blob
+
+    const zipBlob = await buildZip([{ path: 'fallback/data.txt', blob: blobLike }])
+
+    expect(zipBlob.type).toBe('application/zip')
+    expect(zipBlob.size).toBeGreaterThan(0)
+  })
+
+  it('falls back to Response bodies when blob helpers are unavailable', async () => {
+    const blobLike = {
+      size: 5,
+      type: 'text/plain',
+    } as unknown as Blob
+
+    const zipBlob = await buildZip([{ path: 'fallback/data.txt', blob: blobLike }])
+
+    expect(zipBlob.type).toBe('application/zip')
+    expect(zipBlob.size).toBeGreaterThan(0)
+  })
+
+  it('throws when no blob streaming strategy is available', async () => {
+    class ResponseWithoutBody {
+      readonly body = null
+    }
+
+    Object.defineProperty(globalThis, 'Response', {
+      configurable: true,
+      value: ResponseWithoutBody,
+    })
+
+    const blobLike = {
+      size: 5,
+      type: 'text/plain',
+    } as unknown as Blob
+
+    await expect(buildZip([{ path: 'fallback/data.txt', blob: blobLike }])).rejects.toThrow(
+      'Blob stream is unavailable.',
+    )
   })
 })
