@@ -99,7 +99,7 @@ export function ShareCard({ transfer, onExtendTransfer }: Props) {
           try {
             setActionError(undefined)
             await navigator.share({
-              title: transfer?.displayName,
+              ...(transfer?.displayName ? { title: transfer.displayName } : {}),
               url: qrShareUrl,
               text: 'Encrypted files via Xdrop',
             })
