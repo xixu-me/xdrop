@@ -168,10 +168,7 @@ export function HistoryBoard() {
                 <Button tone="danger" onClick={() => void handleDelete(transfer.id)}>
                   {canManageTransfer ? 'Confirm delete' : 'Confirm forget'}
                 </Button>
-                <Button
-                  tone="ghost"
-                  onClick={() => setPendingDeleteTransferId(undefined)}
-                >
+                <Button tone="ghost" onClick={() => setPendingDeleteTransferId(undefined)}>
                   Cancel
                 </Button>
               </>

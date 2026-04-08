@@ -20,15 +20,16 @@ describe('formatLocalDateTime', () => {
   it('prefers navigator.language when navigator.languages is empty', () => {
     let observedLocales: Intl.LocalesArgument | undefined
     let observedOptions: Intl.DateTimeFormatOptions | undefined
-    const DateTimeFormatMock = vi
-      .spyOn(Intl, 'DateTimeFormat')
-      .mockImplementation(function (locales?: Intl.LocalesArgument, options?: Intl.DateTimeFormatOptions) {
-        observedLocales = locales
-        observedOptions = options
-        return {
-          format: () => 'formatted',
-        } as Intl.DateTimeFormat
-      })
+    const DateTimeFormatMock = vi.spyOn(Intl, 'DateTimeFormat').mockImplementation(function (
+      locales?: Intl.LocalesArgument,
+      options?: Intl.DateTimeFormatOptions,
+    ) {
+      observedLocales = locales
+      observedOptions = options
+      return {
+        format: () => 'formatted',
+      } as Intl.DateTimeFormat
+    })
 
     Object.defineProperty(globalThis, 'navigator', {
       configurable: true,
@@ -50,15 +51,16 @@ describe('formatLocalDateTime', () => {
   it('falls back to an undefined locale list when navigator is unavailable', () => {
     let observedLocales: Intl.LocalesArgument | undefined
     let observedOptions: Intl.DateTimeFormatOptions | undefined
-    const DateTimeFormatMock = vi
-      .spyOn(Intl, 'DateTimeFormat')
-      .mockImplementation(function (locales?: Intl.LocalesArgument, options?: Intl.DateTimeFormatOptions) {
-        observedLocales = locales
-        observedOptions = options
-        return {
-          format: () => 'formatted',
-        } as Intl.DateTimeFormat
-      })
+    const DateTimeFormatMock = vi.spyOn(Intl, 'DateTimeFormat').mockImplementation(function (
+      locales?: Intl.LocalesArgument,
+      options?: Intl.DateTimeFormatOptions,
+    ) {
+      observedLocales = locales
+      observedOptions = options
+      return {
+        format: () => 'formatted',
+      } as Intl.DateTimeFormat
+    })
 
     Object.defineProperty(globalThis, 'navigator', {
       configurable: true,
