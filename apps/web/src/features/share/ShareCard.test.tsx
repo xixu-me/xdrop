@@ -186,6 +186,35 @@ describe('ShareCard', () => {
     expect(navigator.clipboard.writeText).not.toHaveBeenCalled()
   })
 
+  it('omits the share title when the transfer has no display name', async () => {
+    const shareMock = vi.fn(async () => {})
+    Object.assign(navigator, { share: shareMock })
+
+    render(
+      <MemoryRouter>
+        <ShareCard
+          transfer={createTransfer('active-3b', '', '2026-03-21T10:00:00.000Z')}
+          onExtendTransfer={extendTransferMock}
+        />
+      </MemoryRouter>,
+    )
+
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Share link' }))
+
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(shareMock).toHaveBeenCalledWith({
+      text: 'Encrypted files via Xdrop',
+      url: 'https://example.com/t/active-3b#k=test',
+    })
+  })
+
   it('falls back to copying when the share sheet is unavailable', async () => {
     render(
       <MemoryRouter>
@@ -442,6 +471,31 @@ describe('ShareCard', () => {
     expect(screen.queryByText('Extend failed')).not.toBeInTheDocument()
   })
 
+  it('falls back to a generic message when extending fails with a non-Error', async () => {
+    extendTransferMock.mockRejectedValueOnce('boom')
+
+    render(
+      <MemoryRouter>
+        <ShareCard
+          transfer={createTransfer('active-8b', 'Extend transfer', '2026-03-21T10:00:00.000Z')}
+          onExtendTransfer={extendTransferMock}
+        />
+      </MemoryRouter>,
+    )
+
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: /Set expiry to 1 week from now/i }))
+
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(screen.getByText('Could not update this transfer right now.')).toBeInTheDocument()
+  })
+
   it('hides the extend action when local management is unavailable', async () => {
     render(
       <MemoryRouter>
@@ -518,5 +572,122 @@ describe('ShareCard', () => {
 
     expect(screen.queryByAltText('Transfer QR code')).not.toBeInTheDocument()
     expect(document.querySelector('.qr-placeholder')).not.toBeNull()
+  })
+
+  it('clears a stale QR image when regenerating the same link fails later', async () => {
+    toDataUrlMock
+      .mockResolvedValueOnce('data:image/png;base64,first')
+      .mockRejectedValueOnce(new Error('QR failed'))
+
+    const { rerender } = render(
+      <MemoryRouter>
+        <ShareCard
+          transfer={createTransfer('active-5b', 'QR reset transfer', '2026-03-21T10:00:00.000Z')}
+          onExtendTransfer={extendTransferMock}
+        />
+      </MemoryRouter>,
+    )
+
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(screen.getByAltText('Transfer QR code')).toHaveAttribute(
+      'src',
+      'data:image/png;base64,first',
+    )
+
+    rerender(
+      <MemoryRouter>
+        <ShareCard
+          transfer={createTransfer('active-5b', 'QR reset transfer', '2026-03-19T10:00:00.000Z')}
+          onExtendTransfer={extendTransferMock}
+        />
+      </MemoryRouter>,
+    )
+
+    rerender(
+      <MemoryRouter>
+        <ShareCard
+          transfer={createTransfer('active-5b', 'QR reset transfer', '2026-03-21T10:00:00.000Z')}
+          onExtendTransfer={extendTransferMock}
+        />
+      </MemoryRouter>,
+    )
+
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(screen.queryByAltText('Transfer QR code')).not.toBeInTheDocument()
+    expect(document.querySelector('.qr-placeholder')).not.toBeNull()
+  })
+
+  it('shows the expired transfer error when one was saved locally', () => {
+    render(
+      <MemoryRouter>
+        <ShareCard
+          transfer={createTransfer('expired-2', 'Expired transfer', '2026-03-19T10:00:00.000Z', {
+            lastError: 'Upload stalled before expiry.',
+          })}
+        />
+      </MemoryRouter>,
+    )
+
+    expect(screen.getByText('Upload stalled before expiry.')).toBeInTheDocument()
+  })
+
+  it('ignores stale QR responses after the transfer changes', async () => {
+    let resolveFirstQr: ((value: string) => void) | undefined
+    let resolveSecondQr: ((value: string) => void) | undefined
+    toDataUrlMock
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            resolveFirstQr = resolve
+          }),
+      )
+      .mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            resolveSecondQr = resolve
+          }),
+      )
+
+    const { rerender } = render(
+      <MemoryRouter>
+        <ShareCard
+          transfer={createTransfer('active-old', 'Old transfer', '2026-03-21T10:00:00.000Z')}
+          onExtendTransfer={extendTransferMock}
+        />
+      </MemoryRouter>,
+    )
+
+    rerender(
+      <MemoryRouter>
+        <ShareCard
+          transfer={createTransfer('active-new', 'New transfer', '2026-03-21T10:00:00.000Z')}
+          onExtendTransfer={extendTransferMock}
+        />
+      </MemoryRouter>,
+    )
+
+    await act(async () => {
+      resolveFirstQr?.('data:image/png;base64,old')
+      await Promise.resolve()
+    })
+
+    expect(screen.queryByAltText('Transfer QR code')).not.toBeInTheDocument()
+    expect(document.querySelector('.qr-placeholder')).not.toBeNull()
+
+    await act(async () => {
+      resolveSecondQr?.('data:image/png;base64,new')
+      await Promise.resolve()
+    })
+
+    expect(screen.getByAltText('Transfer QR code')).toHaveAttribute(
+      'src',
+      'data:image/png;base64,new',
+    )
   })
 })
