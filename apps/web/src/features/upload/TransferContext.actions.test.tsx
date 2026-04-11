@@ -23,6 +23,7 @@ const {
   listTransfersMock,
   loadPersistedSourceFileMock,
   putSourcesMock,
+  persistSourceToOpfsMock,
   putTransferMock,
   registerFilesMock,
   resumeTransferMock,
@@ -100,6 +101,7 @@ const {
     loadPersistedSourceFileMock: vi.fn(
       async (source: PersistedSourceRecord) => source.file ?? null,
     ),
+    persistSourceToOpfsMock: vi.fn(async () => null),
     putSourcesMock: vi.fn(async (records: PersistedSourceRecord[]) => {
       for (const record of records) {
         sourceMap.set(record.key, record)
@@ -146,7 +148,7 @@ vi.mock('@/lib/files/persistentSources', () => ({
   createIndexedDbSourceRecord: createIndexedDbSourceRecordMock,
   deletePersistedTransferSources: deletePersistedTransferSourcesMock,
   loadPersistedSourceFile: loadPersistedSourceFileMock,
-  persistSourceToOpfs: vi.fn(async () => null),
+  persistSourceToOpfs: persistSourceToOpfsMock,
   supportsOpfsSourcePersistence: supportsOpfsSourcePersistenceMock,
 }))
 
@@ -325,6 +327,8 @@ describe('TransferProvider actions', () => {
     loadPersistedSourceFileMock.mockImplementation(
       async (source: PersistedSourceRecord) => source.file ?? null,
     )
+    persistSourceToOpfsMock.mockReset()
+    persistSourceToOpfsMock.mockResolvedValue(null)
     putSourcesMock.mockClear()
     putTransferMock.mockClear()
     registerFilesMock.mockReset()
@@ -404,6 +408,94 @@ describe('TransferProvider actions', () => {
     expect(deleteRemoteTransferMock).toHaveBeenCalledWith('t-created', 'manage-token')
   })
 
+  it('rejects source selections that exceed the app transfer limit before creating a transfer', async () => {
+    renderProvider()
+    await waitFor(() => expect(latestContext).not.toBeNull())
+
+    const oversizedFile = new File(['payload'], 'huge.bin', {
+      lastModified: 2,
+      type: 'application/octet-stream',
+    })
+    Object.defineProperty(oversizedFile, 'size', {
+      configurable: true,
+      value: 268_435_456,
+    })
+
+    await expect(
+      latestContext?.createTransfer(
+        [
+          {
+            file: oversizedFile,
+            relativePath: 'huge.bin',
+          },
+        ],
+        {
+          clearLocalSecretsOnReady: false,
+          displayName: 'Huge transfer',
+          expiresInSeconds: 3600,
+          stripMetadata: false,
+        },
+      ) ?? Promise.resolve(),
+    ).rejects.toThrow('The limit is 256 MiB per transfer.')
+
+    expect(createTransferApiMock).not.toHaveBeenCalled()
+  })
+
+  it('rejects prepared transfers that exceed the limit after smaller chunk sizing is applied', async () => {
+    renderProvider()
+    await waitFor(() => expect(latestContext).not.toBeNull())
+
+    createTransferApiMock.mockResolvedValueOnce({
+      expiresAt: '2026-03-21T08:00:00.000Z',
+      manageToken: 'manage-token',
+      transferId: 't-prepared-limit',
+      uploadConfig: { chunkSize: 1_048_576 },
+    })
+    supportsOpfsSourcePersistenceMock.mockReturnValueOnce(true)
+
+    const virtualLargeFile = new File(['payload'], 'virtual-large.bin', {
+      lastModified: 2,
+      type: 'application/octet-stream',
+    })
+    Object.defineProperty(virtualLargeFile, 'size', {
+      configurable: true,
+      value: 268_434_000,
+    })
+    persistSourceToOpfsMock.mockResolvedValueOnce({
+      fileId: 'file-1',
+      key: 'file-1:source',
+      lastModified: 2,
+      name: 'virtual-large.bin',
+      opfsPath: 't-prepared-limit/file-1.bin',
+      relativePath: 'virtual-large.bin',
+      size: 268_434_000,
+      storage: 'opfs',
+      transferId: 't-prepared-limit',
+      type: 'application/octet-stream',
+    } satisfies PersistedSourceRecord)
+
+    await expect(
+      latestContext?.createTransfer(
+        [
+          {
+            file: virtualLargeFile,
+            relativePath: 'virtual-large.bin',
+          },
+        ],
+        {
+          clearLocalSecretsOnReady: false,
+          displayName: 'Prepared limit transfer',
+          expiresInSeconds: 3600,
+          stripMetadata: false,
+        },
+      ) ?? Promise.resolve(),
+    ).rejects.toThrow('This transfer would upload')
+
+    expect(registerFilesMock).not.toHaveBeenCalled()
+    expect(deletePersistedTransferSourcesMock).toHaveBeenCalledWith('t-prepared-limit')
+    expect(deleteRemoteTransferMock).toHaveBeenCalledWith('t-prepared-limit', 'manage-token')
+  })
+
   it('extends saved transfers and blocks transfers without manage access', async () => {
     transfersStore.set('t1', makeTransferRecord('ready'))
 
@@ -458,6 +550,33 @@ describe('TransferProvider actions', () => {
     expect(deleteTransferRecordMock).not.toHaveBeenCalled()
   })
 
+  it('refreshes transfers in newest-first order', async () => {
+    transfersStore.set(
+      't-old',
+      makeTransferRecord('ready', {
+        createdAt: '2026-03-20T08:00:00.000Z',
+        id: 't-old',
+      }),
+    )
+    transfersStore.set(
+      't-new',
+      makeTransferRecord('ready', {
+        createdAt: '2026-03-20T09:00:00.000Z',
+        id: 't-new',
+      }),
+    )
+
+    renderProvider()
+
+    await waitFor(() => {
+      expect(screen.getByText('t-new:ready:none')).toBeInTheDocument()
+      expect(screen.getByText('t-old:ready:none')).toBeInTheDocument()
+    })
+
+    const transferRows = Array.from(document.querySelectorAll('p')).map((node) => node.textContent)
+    expect(transferRows.slice(0, 2)).toEqual(['t-new:ready:none', 't-old:ready:none'])
+  })
+
   it('marks interrupted uploads as failed when source files are missing', async () => {
     transfersStore.set('t1', makeTransferRecord('uploading'))
 
@@ -470,6 +589,24 @@ describe('TransferProvider actions', () => {
         ),
       ).toBeInTheDocument()
     })
+  })
+
+  it('skips resume attempts when a recovered transfer is no longer saved locally', async () => {
+    listTransfersMock.mockResolvedValueOnce([
+      makeTransferRecord('paused', {
+        id: 'ghost',
+        lastError:
+          'This page was closed or refreshed. Upload will continue automatically when you return here in the same browser on this device.',
+      }),
+    ])
+
+    renderProvider()
+
+    await waitFor(() => {
+      expect(getTransferMock).toHaveBeenCalledWith('ghost')
+    })
+
+    expect(screen.queryByText(/ghost:/)).not.toBeInTheDocument()
   })
 
   it('marks uploads as failed when hydrated source files disappear', async () => {

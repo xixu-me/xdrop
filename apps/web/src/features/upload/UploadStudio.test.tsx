@@ -232,6 +232,43 @@ describe('UploadStudio', () => {
     expect(await screen.findByText('restore failed')).toBeInTheDocument()
   })
 
+  it('avoids restoring draft state after unmount', async () => {
+    const restoredFile = new File(['hello'], 'draft.txt', { lastModified: 12, type: 'text/plain' })
+    let resolveDraft:
+      | ((value: {
+          settings: typeof draftState.settings
+          sources: typeof draftState.sources
+        }) => void)
+      | undefined
+    loadDraftMock.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveDraft = resolve
+        }),
+    )
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    const { unmount } = renderStudio()
+    unmount()
+
+    await act(async () => {
+      resolveDraft?.({
+        settings: { ...draftState.settings, displayName: 'Recovered draft' },
+        sources: [
+          {
+            draftKey: 'draft-1',
+            file: restoredFile,
+            relativePath: 'draft.txt',
+          },
+        ],
+      })
+      await Promise.resolve()
+    })
+
+    expect(errorSpy).not.toHaveBeenCalled()
+    errorSpy.mockRestore()
+  })
+
   it('falls back to default messages for non-Error draft restoration and launch failures', async () => {
     loadDraftMock.mockRejectedValueOnce('boom')
 
@@ -248,6 +285,28 @@ describe('UploadStudio', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Start transfer' }))
 
     expect(await screen.findByText('Could not start the transfer.')).toBeInTheDocument()
+  })
+
+  it('avoids surfacing draft restoration errors after unmount', async () => {
+    let rejectDraft: ((reason?: unknown) => void) | undefined
+    loadDraftMock.mockImplementationOnce(
+      () =>
+        new Promise((_, reject) => {
+          rejectDraft = reject
+        }),
+    )
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+    const { unmount } = renderStudio()
+    unmount()
+
+    await act(async () => {
+      rejectDraft?.(new Error('restore failed'))
+      await Promise.resolve()
+    })
+
+    expect(errorSpy).not.toHaveBeenCalled()
+    errorSpy.mockRestore()
   })
 
   it('starts a transfer with trimmed settings, clears the draft, and navigates', async () => {
@@ -372,6 +431,10 @@ describe('UploadStudio', () => {
       target: { files: [persistedFile] },
     })
 
+    await waitFor(() => {
+      expect(persistDraftMock).toHaveBeenCalledTimes(1)
+    })
+
     unmount()
 
     await act(async () => {
@@ -405,6 +468,10 @@ describe('UploadStudio', () => {
       target: {
         files: [new File(['hello'], 'draft.txt', { lastModified: 12, type: 'text/plain' })],
       },
+    })
+
+    await waitFor(() => {
+      expect(persistDraftMock).toHaveBeenCalledTimes(1)
     })
 
     unmount()
