@@ -101,7 +101,14 @@ const {
     loadPersistedSourceFileMock: vi.fn(
       async (source: PersistedSourceRecord) => source.file ?? null,
     ),
-    persistSourceToOpfsMock: vi.fn(async () => null),
+    persistSourceToOpfsMock: vi.fn<
+      (args: {
+        transferId: string
+        fileId: string
+        relativePath: string
+        file: File
+      }) => Promise<PersistedSourceRecord | null>
+    >(async () => null),
     putSourcesMock: vi.fn(async (records: PersistedSourceRecord[]) => {
       for (const record of records) {
         sourceMap.set(record.key, record)
