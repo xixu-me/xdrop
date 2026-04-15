@@ -29,7 +29,7 @@ jobs:
 
     steps:
       - name: Label updates that can auto-merge
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         env:
           AUTO_MERGE_LABEL: dependencies:auto-merge
         with:
@@ -98,7 +98,7 @@ jobs:
 
     steps:
       - name: Merge safe updates once all checks pass
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         env:
           AUTO_MERGE_LABEL: dependencies:auto-merge
         with:
@@ -189,7 +189,7 @@ jobs:
 
     steps:
       - name: Label all open Dependabot PRs
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         env:
           AUTO_MERGE_LABEL: dependencies:auto-merge
         with:
@@ -241,7 +241,7 @@ jobs:
             }
 
       - name: Merge labeled Dependabot PRs with passing checks
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         env:
           AUTO_MERGE_LABEL: dependencies:auto-merge
         with:
