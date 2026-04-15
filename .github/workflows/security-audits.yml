@@ -87,7 +87,7 @@ jobs:
     steps:
       - name: Create or update failure issue
         if: ${{ needs.bun-audit.result != 'success' || needs.govulncheck.result != 'success' }}
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         env:
           BUN_AUDIT_RESULT: ${{ needs.bun-audit.result }}
           GOVULNCHECK_RESULT: ${{ needs.govulncheck.result }}
@@ -159,7 +159,7 @@ jobs:
 
       - name: Close resolved failure issue
         if: ${{ needs.bun-audit.result == 'success' && needs.govulncheck.result == 'success' }}
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         env:
           ISSUE_LABEL: security-audit
           ISSUE_TITLE: Security audits failing
