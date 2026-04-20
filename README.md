@@ -466,3 +466,7 @@ See [`.env.example`](./.env.example) for the full list. The most important setti
 ## License
 
 AGPL-3.0-only. See [`LICENSE`](./LICENSE).
+
+## Download History
+
+[![Download History](https://skill-history.com/chart/xixu-me/xdrop.svg)](https://skill-history.com/xixu-me/xdrop)
