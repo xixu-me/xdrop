@@ -14,7 +14,7 @@ COPY apps/web ./apps/web
 RUN bun install --frozen-lockfile
 RUN bun run build:web
 
-FROM --platform=$BUILDPLATFORM golang:1.26-alpine AS api-build
+FROM --platform=$BUILDPLATFORM golang:1.26.3-alpine AS api-build
 
 WORKDIR /src/apps/api
 
