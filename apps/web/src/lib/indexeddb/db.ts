@@ -8,13 +8,7 @@ import type { ManifestFileEntry } from '@/lib/api/types'
 
 /** LocalTransferStatus represents sender-side browser state, not the public API state. */
 export type LocalTransferStatus =
-  | 'draft'
-  | 'preparing'
-  | 'uploading'
-  | 'paused'
-  | 'ready'
-  | 'failed'
-  | 'deleted'
+  'draft' | 'preparing' | 'uploading' | 'paused' | 'ready' | 'failed' | 'deleted'
 
 /** LocalTransferRecord stores everything this browser needs to resume and manage a transfer. */
 export type LocalTransferRecord = {
