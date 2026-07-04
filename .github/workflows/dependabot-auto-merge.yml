@@ -3,14 +3,14 @@ name: Dependabot Auto Merge
 on:
   workflow_run:
     workflows:
-      - "Auto-merge Dependencies"
-      - "CI"
-      - "CodeQL"
-      - "Dependabot Updates"
-      - "Dependency Graph"
-      - "Dependency Review"
-      - "Publish Images"
-      - "Security Audits"
+      - 'Auto-merge Dependencies'
+      - 'CI'
+      - 'CodeQL'
+      - 'Dependabot Updates'
+      - 'Dependency Graph'
+      - 'Dependency Review'
+      - 'Publish Images'
+      - 'Security Audits'
     types:
       - completed
   workflow_dispatch:

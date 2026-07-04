@@ -46,9 +46,8 @@ const {
         }
       }
     }),
-    getSourcesForTransferMock: vi.fn(
-      async (transferId: string): Promise<PersistedSourceRecord[]> =>
-        records.filter((record) => record.transferId === transferId),
+    getSourcesForTransferMock: vi.fn(async (transferId: string): Promise<PersistedSourceRecord[]> =>
+      records.filter((record) => record.transferId === transferId),
     ),
     loadPersistedSourceFileMock: vi.fn(
       async (record: PersistedSourceRecord): Promise<File | null> =>
