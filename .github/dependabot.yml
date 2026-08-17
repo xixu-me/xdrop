@@ -15,6 +15,10 @@ updates:
       - xixu-me
     commit-message:
       prefix: 'deps(bun)'
+    ignore:
+      - dependency-name: typescript
+        update-types:
+          - version-update:semver-major
     groups:
       web-and-tooling:
         update-types:
