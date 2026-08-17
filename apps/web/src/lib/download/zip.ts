@@ -2,7 +2,7 @@
  * ZIP creation helpers for download-all flows and small generated archives.
  */
 
-import { TextReader, Uint8ArrayReader, Uint8ArrayWriter, ZipWriter } from '@zip.js/zip.js'
+import { Uint8ArrayReader, Uint8ArrayWriter, ZipWriter } from '@zip.js/zip.js'
 
 import { sanitizePath } from '@/lib/files/paths'
 
@@ -63,7 +63,7 @@ export async function buildZipFromStreams(entries: ZipStreamEntryInput[]) {
 /** buildTextZip creates a small ZIP archive containing one UTF-8 text file. */
 export async function buildTextZip(path: string, content: string) {
   const writer = new ZipWriter(new Uint8ArrayWriter())
-  await writer.add(sanitizePath(path), new TextReader(content))
+  await writer.add(sanitizePath(path), new Uint8ArrayReader(new TextEncoder().encode(content)))
   const bytes = await writer.close()
   return new Blob([bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength)], {
     type: 'application/zip',
