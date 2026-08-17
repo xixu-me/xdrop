@@ -63,10 +63,10 @@ jobs:
                 state: "open",
                 per_page: 100,
               });
-            
+
               return pulls.filter((pr) => pr.user?.login === "dependabot[bot]");
             };
-            
+
             const getMergeablePullRequest = async (pull_number) => {
               for (let attempt = 1; attempt <= 6; attempt += 1) {
                 const { data: pr } = await github.rest.pulls.get({ owner, repo, pull_number });
