@@ -2,7 +2,7 @@ name: Security Audits
 
 on:
   schedule:
-    - cron: '44 2 * * 1'
+    - cron: '43 2 * * 1'
   workflow_dispatch:
 
 permissions:
