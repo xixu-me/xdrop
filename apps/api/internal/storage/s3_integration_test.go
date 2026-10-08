@@ -84,7 +84,7 @@ func startMinIOConfig(t *testing.T, ctx context.Context) Config {
 
 	container := testutil.StartDockerContainer(t, ctx, testutil.DockerRunRequest{
 		NamePrefix: "xdrop-minio",
-		Image:      "minio/minio:latest",
+		Image:      "ghcr.io/coollabsio/minio:RELEASE.2025-10-15T17-29-55Z@sha256:69b55a1c1c5dc285ce04db96689f5b2102317fc77a50680a1874ca6efd1c87f9",
 		Env: map[string]string{
 			"MINIO_ROOT_USER":     "minioadmin",
 			"MINIO_ROOT_PASSWORD": "minioadmin",

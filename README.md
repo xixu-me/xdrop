@@ -350,6 +350,10 @@ bun install --frozen-lockfile
 
 For local development, start PostgreSQL, Redis, and MinIO with Docker:
 
+The MinIO server and setup client use the digest-pinned
+[Coolify MinIO image](https://github.com/coollabsio/minio), built from upstream MinIO source.
+The same image is used in API integration tests and includes both `minio` and `mc`.
+
 ```bash
 docker compose up -d postgres redis minio minio-setup
 ```
