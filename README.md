@@ -43,6 +43,8 @@
 Xdrop is an open source end-to-end encrypted file transfer app for humans and agents, keeping
 plaintext file names, contents, and keys off the server.
 
+> 🎬 **Move private assets safely, then turn them into finished media.** Once a reference image, clip, or project folder is shared through Xdrop, [Renoise](https://renoise.ai/plugin) can turn the creative brief into video, images, or music inside an AI conversation. See the [official plugin repository](https://github.com/ArcoCodes/renoise-plugins-official) for the MCP and Agent Skill integration.
+
 ## Highlights
 
 - End-to-end encrypted file transfer for direct browser sharing and agent-driven handoffs.

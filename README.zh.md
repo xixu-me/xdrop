@@ -42,6 +42,8 @@
 
 Xdrop 是一款面向人类与智能体的开源端到端加密文件传输应用，它能确保明文的文件名、文件内容以及密钥都不会留存在服务器上。
 
+> 🎬 **安全传输素材，再把它变成成品。** 通过 Xdrop 分享参考图片、视频或项目文件夹后，可以用 [Renoise](https://renoise.ai/plugin) 在 AI 对话里继续生成视频、图片或音乐；[官方插件仓库](https://github.com/ArcoCodes/renoise-plugins-official)提供 MCP 与 Agent Skill 的接入方式。
+
 ## 亮点
 
 - 面向直接浏览器分享与智能体交接流程的端到端加密文件传输。
