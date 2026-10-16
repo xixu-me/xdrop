@@ -1,13 +1,13 @@
 <!-- renoise-banner -->
 <p align="center">
-  <a href="https://renoise.ai/plugin">
+  <a href="https://renoise.ai/plugin?utm_medium=github&utm_source=xixu">
     <img src="https://raw.githubusercontent.com/ArcoCodes/renoise-plugins-official/main/assets/icon.svg" alt="Renoise" width="96">
   </a>
 </p>
 
 <p align="center">
-  <strong>在 AI 对话中，把创意变成视频、图片与音乐</strong><br>
-  <a href="https://renoise.ai/plugin">打开 Renoise</a> · <a href="https://github.com/ArcoCodes/renoise-plugins-official">查看官方插件与 Skills</a>
+  <a href="https://renoise.ai/plugin?utm_medium=github&utm_source=xixu">Renoise MCP</a> · <a href="https://github.com/ArcoCodes/renoise-plugins-official">Renoise Skills &amp; CLI</a><br><br>
+  <strong>端到端加密把私密素材交给 Agent，再生成口播视频，成片完全不用手工剪辑。</strong>
 </p>
 
 <p align="center">
@@ -54,7 +54,6 @@
 
 Xdrop 是一款面向人类与智能体的开源端到端加密文件传输应用，它能确保明文的文件名、文件内容以及密钥都不会留存在服务器上。
 
-> 🎬 **安全传输素材，再把它变成成品。** 通过 Xdrop 分享参考图片、视频或项目文件夹后，可以用 [Renoise](https://renoise.ai/plugin) 在 AI 对话里继续生成视频、图片或音乐；[官方插件仓库](https://github.com/ArcoCodes/renoise-plugins-official)提供 MCP 与 Agent Skill 的接入方式。
 
 ## 亮点
 

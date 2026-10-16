@@ -1,13 +1,13 @@
 <!-- renoise-banner -->
 <p align="center">
-  <a href="https://renoise.ai/plugin">
+  <a href="https://renoise.ai/plugin?utm_medium=github&utm_source=xixu">
     <img src="https://raw.githubusercontent.com/ArcoCodes/renoise-plugins-official/main/assets/icon.svg" alt="Renoise" width="96">
   </a>
 </p>
 
 <p align="center">
-  <strong>Turn ideas into video, images, and music from your AI conversation</strong><br>
-  <a href="https://renoise.ai/plugin">Open Renoise</a> · <a href="https://github.com/ArcoCodes/renoise-plugins-official">Official plugin &amp; Skills</a>
+  <a href="https://renoise.ai/plugin?utm_medium=github&utm_source=xixu">Renoise MCP</a> · <a href="https://github.com/ArcoCodes/renoise-plugins-official">Renoise Skills &amp; CLI</a><br><br>
+  <strong>Pass private references to your Agent end to end encrypted, then create the talking-head video without hand-editing the result.</strong>
 </p>
 
 <p align="center">
@@ -55,7 +55,6 @@
 Xdrop is an open source end-to-end encrypted file transfer app for humans and agents, keeping
 plaintext file names, contents, and keys off the server.
 
-> 🎬 **Move private assets safely, then turn them into finished media.** Once a reference image, clip, or project folder is shared through Xdrop, [Renoise](https://renoise.ai/plugin) can turn the creative brief into video, images, or music inside an AI conversation. See the [official plugin repository](https://github.com/ArcoCodes/renoise-plugins-official) for the MCP and Agent Skill integration.
 
 ## Highlights
 
