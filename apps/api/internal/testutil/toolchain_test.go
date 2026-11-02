@@ -21,9 +21,9 @@ func TestRequiresPatchedGoToolchain(t *testing.T) {
 		return
 	}
 
-	if major == 1 && minor == 26 && patch < 2 {
+	if major == 1 && minor == 26 && patch < 10 {
 		t.Fatalf(
-			"Go toolchain %q is below the minimum patched version go1.26.2 required by the security audit",
+			"Go toolchain %q is below the minimum patched version go1.26.10 required by the security audit",
 			runtime.Version(),
 		)
 	}
