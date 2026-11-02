@@ -55,7 +55,6 @@
 Xdrop is an open source end-to-end encrypted file transfer app for humans and agents, keeping
 plaintext file names, contents, and keys off the server.
 
-
 ## Highlights
 
 - End-to-end encrypted file transfer for direct browser sharing and agent-driven handoffs.
